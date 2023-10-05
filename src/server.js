@@ -1,11 +1,6 @@
-const fs = require("fs");
-const path = require("path");
 const express = require("express");
-const morgan = require("morgan");
 const cors = require("cors");
-
-
-
+const coockieParser = require("cookie-parser");
 //require .env
 require("dotenv").config();
 //db config
@@ -15,26 +10,26 @@ const { errorHandler } = require("./helpers/errorHandler");
 //init server
 const server = express();
 
+// cookie
+server.use(coockieParser());
+
 //init cors
-server.use(cors());
+server.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 
 //use json
 server.use(express.json());
 
-
-
 //require routes
 
-
-// const routes = require("./router");
-// server.use(routes);
+const routes = require("./router");
+server.use(routes);
 
 //use errorHandler
 server.use(errorHandler);
 
 //run server
 connectDB()
-  .then(con => {
+  .then((con) => {
     console.log(
       `database connected host:${con.connection.host},dbname:${con.connection.db.databaseName}`
     );
@@ -47,6 +42,6 @@ connectDB()
       );
     });
   })
-  .catch(err => console.error("failed to connect to database"));
+  .catch((err) => console.error("failed to connect to database"));
 
 module.exports = server;
