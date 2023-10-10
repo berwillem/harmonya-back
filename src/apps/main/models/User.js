@@ -17,16 +17,18 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
-  // phone: {
-  //   type: String,
-  //   required: true,
-  //   unique: true,
-  //   trim: true,
-  // },
-  // birthdate: {
-  //   type: Date,
-  //   required: true,
-  // },
+  role: {
+    type: String,
+    default: "User",
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  birthdate: {
+    type: Date,
+    required: true,
+  },
 });
 
 const User = mongoose.model("User", userSchema);

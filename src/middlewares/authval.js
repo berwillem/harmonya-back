@@ -16,3 +16,16 @@ exports.verifyToken = (req, res, next) => {
   });
   next();
 };
+exports.checkUserRole = (requiredRole) => {
+  return (req, res, next) => {
+    const userRole = req.userRole;
+
+    if (userRole === requiredRole || userRole === "admin") {
+      next();
+    } else {
+      return res.status(403).json({
+        message: "Access denied. You don't have permission for this action.",
+      });
+    }
+  };
+};
