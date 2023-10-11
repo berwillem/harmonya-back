@@ -18,5 +18,3 @@ const serviceSchema = new mongoose.Schema({
 const Service = mongoose.model("Service", serviceSchema);
 
 module.exports = Service;
-
-// Services (avec prix de réservation, détails, prise de rendez-vous avec date et heure disponibles)
