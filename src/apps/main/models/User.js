@@ -23,11 +23,11 @@ const userSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    required: true,
+    required: false,
   },
   birthdate: {
     type: Date,
-    required: true,
+    required: false,
   },
 });
 
