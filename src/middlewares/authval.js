@@ -1,4 +1,7 @@
 const jwt = require("jsonwebtoken");
+const User = require("../apps/main/models/User");
+const Magasin = require("../apps/main/models/Magasin");
+const Admin = require("../apps/admin/models/Admin");
 
 exports.verifyToken = (req, res, next) => {
   const cookies = req.headers.cookie;
@@ -16,16 +19,51 @@ exports.verifyToken = (req, res, next) => {
   });
   next();
 };
-exports.checkUserRole = (requiredRole) => {
-  return (req, res, next) => {
-    const userRole = req.userRole;
 
-    if (userRole === requiredRole || userRole === "admin") {
+exports.checkUserAccess = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user) {
+      req.role = "User";
       next();
     } else {
       return res.status(403).json({
         message: "Access denied. You don't have permission for this action.",
       });
     }
-  };
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.checkMagasinAccess = async (req, res, next) => {
+  try {
+    const magasin = await Magasin.findById(req.body.magasin);
+    if (magasin) {
+      req.role = "Magasin";
+      next();
+    } else {
+      return res.status(403).json({
+        message: "Access denied. You don't have permission for this action.",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.checkAdminAccess = async (req, res, next) => {
+  try {
+    const admin = await Admin.findById(req.userId);
+    if (admin) {
+      req.role = "Admin";
+      next();
+    } else {
+      return res.status(403).json({
+        message: "Access denied. You don't have permission for this action.",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 };

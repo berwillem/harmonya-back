@@ -6,16 +6,16 @@ const jwt = require("jsonwebtoken");
 
 exports.signup = async (req, res) => {
   const { magasinName, email, password } = req.body;
-  let existingUser;
+  let existingMagasin;
   try {
-    existingUser = await Magasin.findOne({ email: email });
+    existingMagasin = await Magasin.findOne({ email: email });
   } catch (err) {
     console.log(err);
   }
-  if (existingUser) {
+  if (existingMagasin) {
     return res
       .status(400)
-      .json({ message: "Magasin already exsist ! Login instead " });
+      .json({ message: "Magasin already exists! Login instead." });
   }
   const hashedPassword = bcrypte.hashSync(password);
   const magasin = new Magasin({
@@ -26,10 +26,41 @@ exports.signup = async (req, res) => {
 
   try {
     await magasin.save();
+
+    const existingMagasin = await Magasin.findOne({ email: email });
+    if (!existingMagasin) {
+      return res
+        .status(400)
+        .json({ message: "Magasin not found. Signup Please" });
+    }
+    const isPasswordCorrect = bcrypte.compareSync(
+      password,
+      existingMagasin.password
+    );
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid Email / password" });
+    }
+    const token = jwt.sign(
+      { id: existingMagasin._id },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "3h",
+      }
+    );
+    res.cookie(String(existingMagasin._id), token, {
+      path: "/",
+      expires: new Date(Date.now() + 10800000),
+      httpOnly: true,
+      sameSite: "lax",
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Successfully Signed Up and Logged In", magasin });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: "Error during signup" });
   }
-  return res.status(201).json({ message: magasin });
 };
 
 // login magasin:

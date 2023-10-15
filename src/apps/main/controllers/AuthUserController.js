@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
   if (existingUser) {
     return res
       .status(400)
-      .json({ message: "user already exsist ! Login instead " });
+      .json({ message: "User already exists! Login instead." });
   }
   const hashedPassword = bcrypte.hashSync(password);
   const user = new User({
@@ -26,12 +26,25 @@ exports.signup = async (req, res) => {
 
   try {
     await user.save();
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "3h",
+    });
+    res.cookie(String(user._id), token, {
+      path: "/",
+      expires: new Date(Date.now() + 10800000),
+      httpOnly: true,
+      sameSite: "lax",
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Successfully Signed Up and Logged In", user });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: "Error during signup" });
   }
-  return res.status(201).json({ message: user });
 };
-
 // login user:
 exports.login = async (req, res) => {
   const { email, password } = req.body;

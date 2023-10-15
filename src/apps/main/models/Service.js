@@ -13,6 +13,11 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  magasin: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Magasin",
+    required: true,
+  },
 });
 
 const Service = mongoose.model("Service", serviceSchema);

@@ -1,0 +1,13 @@
+const express = require("express");
+const router = express.Router({ mergeParams: true });
+const ServiceController = require("../controllers/ServiceController");
+const {
+  verifyToken,
+  checkMagasinAccess,
+} = require("../../../middlewares/authval");
+
+// user auth routes :
+router.get("/", ServiceController.getAllServices);
+router.post("/", checkMagasinAccess, ServiceController.createService);
+module.exports = router;
+    

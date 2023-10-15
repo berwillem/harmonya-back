@@ -1,11 +1,16 @@
 const Service = require("../models/Service");
+const Magasin = require("../models/Magasin");
 
 // Create a new service
 exports.createService = async (req, res) => {
   try {
-    const { Name, prix, details } = req.body;
-    const newService = new Service({ Name, prix, details });
+    const { Name, prix, details, magasin } = req.body;
+    const newService = new Service({ Name, prix, details, magasin });
     const savedService = await newService.save();
+    await Magasin.findByIdAndUpdate(magasin, {
+      $push: { services: savedService._id },
+    });
+
     res.status(201).json(savedService);
   } catch (error) {
     res
