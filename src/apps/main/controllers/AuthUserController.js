@@ -30,7 +30,7 @@ exports.signup = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "3h",
     });
-    res.cookie(String(user._id), token, {
+    res.cookie("jwtoken", token, {
       path: "/",
       expires: new Date(Date.now() + 10800000),
       httpOnly: true,
@@ -75,9 +75,10 @@ exports.login = async (req, res) => {
     sameSite: "lax",
   });
 
-  return res
-    .status(200)
-    .json({ message: "Successfully Logged In", user: existingUser });
+  return res.status(200).json({
+    message: "Successfully Logged In",
+    user: existingUser,
+  });
 };
 
 // logout :

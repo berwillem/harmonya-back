@@ -4,7 +4,7 @@ const Magasin = require("../apps/main/models/Magasin");
 const Admin = require("../apps/admin/models/Admin");
 
 exports.verifyToken = (req, res, next) => {
-  const cookies = req.cookies;
+  const { cookies } = req;
 
   const token = cookies.jwtoken;
   if (!token) {
@@ -15,7 +15,7 @@ exports.verifyToken = (req, res, next) => {
     if (err) {
       return res
         .status(401)
-        .json({ message: "Invalide tokenz", tokenzz: token });
+        .json({ message: "Invalide token" });
     }
     req.id = user.id;
   });

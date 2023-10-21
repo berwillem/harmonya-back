@@ -47,7 +47,7 @@ exports.signup = async (req, res) => {
         expiresIn: "3h",
       }
     );
-    res.cookie(String(existingMagasin._id), token, {
+    res.cookie("jwtoken", token, {
       path: "/",
       expires: new Date(Date.now() + 10800000),
       httpOnly: true,
@@ -88,7 +88,7 @@ exports.login = async (req, res) => {
   const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: "3h",
   });
-  res.cookie(String(existingUser._id), token, {
+  res.cookie("jwtoken", token, {
     path: "/",
     expires: new Date(Date.now() + 10800000),
     httpOnly: true,
@@ -97,14 +97,18 @@ exports.login = async (req, res) => {
 
   return res
     .status(200)
-    .json({ message: "Successfully Logged In", magasin: existingUser });
+    .json({
+      message: "Successfully Logged In",
+      magasin: existingUser,
+    });
 };
 
 // logout :
 
 exports.logout = async (req, res) => {
-  const cookies = req.headers.cookie;
-  const token = cookies.split("=")[1];
+  const { cookies } = req;
+  const token = cookies.jwtoken;
+
   if (!token) {
     return res.status(404).json({ message: "token not found" });
   }
@@ -113,8 +117,8 @@ exports.logout = async (req, res) => {
       console.log(err);
       return res.status(401).json({ message: "Invalide token" });
     }
-    res.clearCookie(`${magasin.id}`);
-    req.cookies[`${magasin.id}`] = "";
-    return res.status(200).json({ message: "loged out" });
+    res.clearCookie("jwtoken");
+    req.cookies["jwtoken"] = "";
+    return res.status(200).json({ message: "logged out" });
   });
 };
