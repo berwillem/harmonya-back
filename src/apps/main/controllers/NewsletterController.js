@@ -15,12 +15,9 @@ exports.subscribeEmail = async (req, res) => {
   }
   const newsEmail = new NewsletterEmail({
     email: email,
-    // expiryDate: Date.now(), 
   });
-  console.log(new Date())
   try {
     await newsEmail.save();
-    console.log("WEEEEEEE")
     return res.status(201).json({ message: "Subscribed to Newsletter" });
   } catch (err) {
     console.log(err);
