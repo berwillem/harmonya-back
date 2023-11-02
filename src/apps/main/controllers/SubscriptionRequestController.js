@@ -3,9 +3,8 @@ const Magasin = require("../models/Magasin");
 
 exports.createSubscriptionRequest = async (req, res) => {
   try {
-
     const { magasinId, type, request } = req.body;
-    
+
     const newSubscriptionRequest = new SubscriptionRequest({
       magasin: magasinId,
       type,
