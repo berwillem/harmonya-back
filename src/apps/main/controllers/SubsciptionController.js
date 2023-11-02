@@ -1,8 +1,9 @@
 const Subscription = require("../models/Subscription");
+const Magasin = require("../models/Magasin");
 
 exports.startFreeTrial = async (req, res) => {
   try {
-    const { magasinId } = req.params;
+    const magasinId = req.query.magasinId;
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate() + 30);
@@ -18,6 +19,10 @@ exports.startFreeTrial = async (req, res) => {
       trial: true,
     });
     await newSubscription.save();
+    await Magasin.findByIdAndUpdate(magasinId, {
+      $push: { subscriptions: newSubscription._id },
+    });
+
     res.status(201).json({
       message: "Free trial started successfully",
       subscription: newSubscription,
@@ -27,4 +32,3 @@ exports.startFreeTrial = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-

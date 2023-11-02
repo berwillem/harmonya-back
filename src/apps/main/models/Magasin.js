@@ -31,6 +31,10 @@ const magasinSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Subscription",
   },
+  subscriptionRequest: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SubscriptionRequest",
+  },
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);
