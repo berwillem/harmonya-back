@@ -1,7 +1,9 @@
 const express = require("express");
-const { getAllMagasin } = require("../controllers/MagasinController");
+const MagasinController = require("../controllers/MagasinController");
+const trackMagasinVisit = require("../../../middlewares/TrackVist");
 const router = express.Router();
 
-router.get("/", getAllMagasin);
+router.get("/", MagasinController.getAllMagasin);
+router.get('/:id', trackMagasinVisit, MagasinController.getMagasinById);
 
 module.exports = router;

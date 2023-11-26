@@ -5,6 +5,6 @@ const { verifyToken } = require("../../../middlewares/authval");
 
 // user routes :
 
-router.get("/", verifyToken, UserController.getUser);
+router.get("/:id", verifyToken, UserController.getUser);
 
 module.exports = router;
