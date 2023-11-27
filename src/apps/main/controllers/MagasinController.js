@@ -1,25 +1,59 @@
 const Magasin = require("../models/Magasin");
+const Service = require("../models/Service");
 
 exports.getAllMagasin = (req, res) => {
   Magasin.find({})
     .limit(req.query.num ? req.query.num : 4)
     .then((magasins) => {
-      res.send(magasins.map((magasin) => ({ name: magasin.magasinName })));
+      res.send(magasins.map((magasin) => ({ name: magasin.magasinName, id: magasin._id })));
     });
 };
-exports.getMagasinById = (req, res) => {
-  const magasinId = req.params.id;
-  Magasin.findById(magasinId)
-    .select("-password")
-    .then((magasin) => {
-      if (!magasin) {
-        return res.status(404).json({ message: "Magasin not found" });
-      }
+exports.setMagasinInfo = async (req, res) => {
+  const { id, info } = req.body;
+  console.log(req.body)
+  try {
 
-      res.send(magasin);
-    })
-    .catch((err) => {
-      console.error("Error retrieving Magasin by ID:", err);
-      res.status(500).json({ message: "Internal server error" });
-    });
+    await Magasin.findByIdAndUpdate(
+      id,
+      { infos:info },
+      { new: true, runValidators: true },
+      );
+    
+    return res.status(201).json({message: "Update Successful"})
+  }
+  catch(err) {
+    console.log(err)
+  }
 };
+
+exports.getMagasinServices = async (req, res) => {
+  const {magasinId} = req.query
+  try{
+
+    const {services} = await Magasin.findOne({_id:magasinId})
+    return res.status(201).json(await Service.find({_id:{$in:services}}))
+    
+  }catch(error){
+    return res.status(400).json({message:"mouchkil"})
+  }
+  
+
+
+}
+
+exports.getMagasinInfos = async (req, res) => {
+  const {magasinId} = req.query
+  try{
+
+    const {infos} = await Magasin.findOne({_id:magasinId})
+    return res.status(201).json(infos)
+    
+  }catch(error){
+    return res.status(400).json({message:"mouchkil"})
+  }
+  
+
+
+}
+
+

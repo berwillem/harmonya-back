@@ -35,6 +35,10 @@ const magasinSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "SubscriptionRequest",
   },
+  infos : {
+    type: Object,
+    default:{}
+  },
   data: {
     visits: {
       timestamps: [
@@ -45,6 +49,7 @@ const magasinSchema = new mongoose.Schema({
       ],
     },
   },
+
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);

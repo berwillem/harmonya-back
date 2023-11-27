@@ -1,9 +1,13 @@
 const express = require("express");
-const MagasinController = require("../controllers/MagasinController");
-const trackMagasinVisit = require("../../../middlewares/TrackVist");
+
+const { getAllMagasin, setMagasinInfo, getMagasinServices, getMagasinInfos } = require("../controllers/MagasinController");
 const router = express.Router();
 
-router.get("/", MagasinController.getAllMagasin);
-router.get('/:id', trackMagasinVisit, MagasinController.getMagasinById);
+router.get("/", getAllMagasin);
+router.post("/update", setMagasinInfo)
+router.get("/services", getMagasinServices)
+router.get("/infos", getMagasinInfos)
+
+
 
 module.exports = router;
