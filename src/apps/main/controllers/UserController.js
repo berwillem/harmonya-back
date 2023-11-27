@@ -1,7 +1,7 @@
 const User = require("../models/User");
 
-exports.getUser = async (req, res, next) => {
-  const userId = req.id;
+exports.getUser = async (req, res) => {
+  const userId = req.params.id;
   let user;
   try {
     user = await User.findById(userId, "-password");

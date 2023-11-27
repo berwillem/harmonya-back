@@ -38,7 +38,18 @@ const magasinSchema = new mongoose.Schema({
   infos : {
     type: Object,
     default:{}
-  }
+  },
+  data: {
+    visits: {
+      timestamps: [
+        {
+          visitorId: String,
+          timestamp: Date,
+        },
+      ],
+    },
+  },
+
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);

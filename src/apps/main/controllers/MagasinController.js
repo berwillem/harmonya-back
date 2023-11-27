@@ -8,7 +8,6 @@ exports.getAllMagasin = (req, res) => {
       res.send(magasins.map((magasin) => ({ name: magasin.magasinName, id: magasin._id })));
     });
 };
-
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
   console.log(req.body)
@@ -56,3 +55,5 @@ exports.getMagasinInfos = async (req, res) => {
 
 
 }
+
+
