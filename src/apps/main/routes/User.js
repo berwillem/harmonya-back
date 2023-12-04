@@ -7,4 +7,5 @@ const { verifyToken } = require("../../../middlewares/authval");
 
 router.get("/:id", UserController.getUser);
 
+
 module.exports = router;

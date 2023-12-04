@@ -1,7 +1,10 @@
 const Magasin = require("../models/Magasin");
 const bcrypte = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const ResetToken = require("../models/resetPassword");
+const { creatRandomBytes } = require("../../../helpers/RandomBytes");
+const { ResetPassEmail } = require("../../../helpers/ResetEmailTemplate");
+const SibApiV3Sdk = require("../../../config/sendiblue");
 // signup magasin :
 
 exports.signup = async (req, res) => {
@@ -95,12 +98,10 @@ exports.login = async (req, res) => {
     sameSite: "lax",
   });
 
-  return res
-    .status(200)
-    .json({
-      message: "Successfully Logged In",
-      magasin: existingUser,
-    });
+  return res.status(200).json({
+    message: "Successfully Logged In",
+    magasin: existingUser,
+  });
 };
 
 // logout :
@@ -120,5 +121,80 @@ exports.logout = async (req, res) => {
     res.clearCookie("jwtoken");
     req.cookies["jwtoken"] = "";
     return res.status(200).json({ message: "logged out" });
+  });
+};
+
+// forgot password magasin :
+exports.forgotPasswordMagasin = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    // Handle the case of missing email here if needed
+    res
+      .status(400)
+      .json({ success: false, message: "Please provide a valid email!" });
+    return;
+  }
+
+  const magasin = await Magasin.findOne({ email });
+  if (!magasin) {
+    // Handle the case of magasin not found here if needed
+    res.status(404).json({ success: false, message: "magasin not found" });
+    return;
+  }
+
+  const token = await ResetToken.findOne({ owner: magasin._id });
+  if (token) {
+    // Handle the case where a token already exists
+    res.status(400).json({
+      success: false,
+      message: "Token already exists. Check your email.",
+    });
+    return;
+  }
+
+  const randomBytes = await creatRandomBytes();
+  const resetToken = new ResetToken({ owner: magasin._id, token: randomBytes });
+  await resetToken.save();
+
+  const url = `http://localhost:5173/PassForgotMagasin?token=${randomBytes}&id=${user._id}`;
+
+  new SibApiV3Sdk.TransactionalEmailsApi()
+    .sendTransacEmail({
+      sender: { email: "harmonyadz@gmail.com", name: "Harmonya" },
+      subject: "passwordreset",
+      htmlContent: ResetPassEmail(url),
+      to: [
+        {
+          email: magasin.email,
+        },
+      ],
+    })
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  res.json({
+    success: true,
+    message: "Password reset link is sent to your email.",
+  });
+};
+// resetpassword magasin
+exports.resetpassword = async (req, res) => {
+  const { password } = req.body;
+  const magasin = await Magasin.findById(req.magasin._id);
+  if (!magasin) return sendError(res, "magasin not found");
+  const isSame = await magasin.comparePassword(password);
+  if (isSame) return sendError(res, "New password Must be different");
+  if (password.trim().length < 8 || password.trim().length > 20)
+    return sendError(res, "password must be 8 to 20 caracters");
+    magasin.password = password.trim();
+  await magasin.save();
+  await ResetToken.findOneAndDelete({ owner: magasin._id });
+  res.status(200).json({
+    success: true,
+    message: "Password updated",
   });
 };
