@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: false,
   },
+  bookmarks: {
+    stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Magasin" }],
+    services: [{ type: mongoose.Schema.Types.ObjectId, ref: "Service" }],
+    default:{}
+  },
 });
 
 const User = mongoose.model("User", userSchema);
