@@ -9,5 +9,6 @@ router.use("/newsletter", require("../../apps/main/routes/NewsLetter"));
 router.use("/categories", require("../../apps/main/routes/Category"));
 router.use("/subscription", require("../../apps/main/routes/Subscription"));
 router.use("/magasin", require("../../apps/main/routes/Magasin"));
+router.use("/store", require("../../apps/main/routes/Store"));
 
 module.exports = router;
