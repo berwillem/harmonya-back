@@ -27,6 +27,7 @@ const magasinSchema = new mongoose.Schema({
       ref: "Service",
     },
   ],
+  stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Store" }],
   subscription: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Subscription",
@@ -34,10 +35,6 @@ const magasinSchema = new mongoose.Schema({
   subscriptionRequest: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "SubscriptionRequest",
-  },
-  infos : {
-    type: Object,
-    default:{}
   },
   data: {
     visits: {
@@ -49,7 +46,6 @@ const magasinSchema = new mongoose.Schema({
       ],
     },
   },
-
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);

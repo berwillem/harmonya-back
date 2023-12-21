@@ -9,4 +9,5 @@ router.get("/:id", UserController.getUser);
 router.get("/bookmarks/:id", UserController.getBookmarks)
 router.post("/bookmarks/", UserController.toggleBookmark)
 
+
 module.exports = router;
