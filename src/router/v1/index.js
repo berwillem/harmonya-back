@@ -1,14 +1,17 @@
 const { Router } = require("express");
 
+const ROUTES_PATH = "../../apps/main/routes/"
+
 const router = Router();
-router.use("/auth/user", require("../../apps/main/routes/AuthUser"));
-router.use("/auth/magasin", require("../../apps/main/routes/AuthMagasin"));
-router.use("/user", require("../../apps/main/routes/User"));
-router.use("/service", require("../../apps/main/routes/Service"));
-router.use("/newsletter", require("../../apps/main/routes/NewsLetter"));
-router.use("/categories", require("../../apps/main/routes/Category"));
-router.use("/subscription", require("../../apps/main/routes/Subscription"));
-router.use("/magasin", require("../../apps/main/routes/Magasin"));
-router.use("/store", require("../../apps/main/routes/Store"));
+router.use("/auth/user", require(ROUTES_PATH+"AuthUser"));
+router.use("/auth/magasin", require(ROUTES_PATH+"AuthMagasin"));
+router.use("/user", require(ROUTES_PATH+"User"));
+router.use("/service", require(ROUTES_PATH+"Service"));
+router.use("/newsletter", require(ROUTES_PATH+"NewsLetter"));
+router.use("/categories", require(ROUTES_PATH+"Category"));
+router.use("/subscription", require(ROUTES_PATH+"Subscription"));
+router.use("/magasin", require(ROUTES_PATH+"Magasin"));
+router.use("/bookmarks", require(ROUTES_PATH+"Bookmarks"))
+router.use("/store", require(ROUTES_PATH+"Store"));
 
 module.exports = router;
