@@ -45,6 +45,10 @@ const magasinSchema = new mongoose.Schema({
         },
       ],
     },
+    bookmarks: {
+      type: Number,
+      default: 0,
+    },
   },
 });
 

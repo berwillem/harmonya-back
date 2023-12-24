@@ -1,18 +1,6 @@
 const User = require("../models/User");
+const Magasin = require("../models/Magasin")
 
-exports.addBookmark = async (req, res) => {
-  const { userId, storeId } = req.body;
-  try {
-    await User.findByIdAndUpdate(userId, {
-      $push: { "bookmarks.stores": storeId },
-    });
-
-    
-    return res.status(201).json({message:"Bookmarked Successfully"})
-  } catch (err) {
-    console.log(err);
-  }
-};
 
 exports.getBookmarks = async (req, res) => {
   const userId = req.params.id;
@@ -44,12 +32,20 @@ exports.toggleBookmark = async (req, res) => {
         $pull: { "bookmarks.stores": storeId },
       });
 
+      await Magasin.findByIdAndUpdate(storeId, {
+        $inc: {"data.bookmarks": -1 }
+      })
+
       return res.status(200).json({ message: "Unbookmarked Successfully" });
     } else {
       // If not bookmarked, bookmark by adding to the array
       await User.findByIdAndUpdate(userId, {
         $push: { "bookmarks.stores": storeId },
       });
+
+      await Magasin.findByIdAndUpdate(storeId, {
+        $inc: {"data.bookmarks": 1 }
+      })
 
       return res.status(201).json({ message: "Bookmarked Successfully" });
     }
