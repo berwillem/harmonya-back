@@ -8,6 +8,7 @@ const {
 
 // user auth routes :
 router.get("/", ServiceController.getAllServices);
-router.post("/", checkMagasinAccess, ServiceController.createService);
+router.post("/", ServiceController.createService);
+router.get("/category/:id", ServiceController.getServicesByCategory)
 module.exports = router;
     

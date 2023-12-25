@@ -36,6 +36,10 @@ const magasinSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "SubscriptionRequest",
   },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+  },
   data: {
     visits: {
       timestamps: [
