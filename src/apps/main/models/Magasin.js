@@ -54,6 +54,13 @@ const magasinSchema = new mongoose.Schema({
       default: 0,
     },
   },
+  infos: {
+    name: String,
+    address: String,
+    email: String,
+    number: String,
+    description: String,
+  }
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);
