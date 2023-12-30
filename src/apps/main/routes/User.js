@@ -5,6 +5,7 @@ const { verifyToken } = require("../../../middlewares/authval");
 
 // user routes :
 
+router.get("/", UserController.getAllUsers);
 router.get("/:id", UserController.getUser);
 
 
