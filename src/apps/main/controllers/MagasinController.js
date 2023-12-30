@@ -3,17 +3,15 @@ const Service = require("../models/Service");
 const Category = require("../models/Category");
 const { filterObject } = require("../../../helpers/utilities");
 
-exports.getAllMagasin = (req, res) => {
-  Magasin.find({})
-    .limit(req.query.num ? req.query.num : 4)
-    .then((magasins) => {
-      res.send(
-        magasins.map((magasin) => ({
-          name: magasin.magasinName,
-          id: magasin._id,
-        }))
-      );
-    });
+exports.getAllMagasins = async (req, res) => {
+  try {
+    const magasins = await Magasin.find(); 
+
+    return res.status(200).json(magasins);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
 };
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
