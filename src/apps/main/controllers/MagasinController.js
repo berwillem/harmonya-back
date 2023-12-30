@@ -1,5 +1,7 @@
 const Magasin = require("../models/Magasin");
 const Service = require("../models/Service");
+const Category = require("../models/Category");
+const { filterObject } = require("../../../helpers/utilities");
 
 exports.getAllMagasins = async (req, res) => {
   try {
@@ -42,6 +44,23 @@ exports.getMagasinInfos = async (req, res) => {
   try {
     const { infos } = await Magasin.findOne({ _id: magasinId });
     return res.status(201).json(infos);
+  } catch (error) {
+    return res.status(400).json({ message: "mouchkil" });
+  }
+};
+
+exports.getMagasinsByCategory = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const magasins = await Magasin.find({ category: id });
+    return res
+      .status(201)
+      .json(
+        magasins.map((magasin) =>
+          filterObject(magasin, ["magasinName", "services", "stores"])
+        )
+      );
   } catch (error) {
     return res.status(400).json({ message: "mouchkil" });
   }

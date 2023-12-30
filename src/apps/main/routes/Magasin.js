@@ -13,4 +13,5 @@ router.post("/update", setMagasinInfo);
 router.get("/services", getMagasinServices);
 router.get("/infos", getMagasinInfos);
 
+
 module.exports = router;

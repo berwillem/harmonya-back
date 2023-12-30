@@ -83,3 +83,17 @@ exports.deleteServiceById = async (req, res) => {
       .json({ error: "An error occurred while deleting the service." });
   }
 };
+
+exports.getServicesByCategory = async (req, res) => {
+  const { id } = req.params;
+  try {
+    let serviceIds = [];
+    const magasins = await Magasin.find({ category: id });
+    magasins.map((magasin) => serviceIds.push(...magasin.services));
+    const services = await Service.find({ _id: { $in: serviceIds } });
+    return res.status(201).json(services);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: "mouchkil" });
+  }
+};
