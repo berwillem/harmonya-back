@@ -13,5 +13,6 @@ router.use("/subscription", require(ROUTES_PATH+"Subscription"));
 router.use("/magasin", require(ROUTES_PATH+"Magasin"));
 router.use("/bookmarks", require(ROUTES_PATH+"Bookmarks"))
 router.use("/store", require(ROUTES_PATH+"Store"));
+router.use("/boost", require(ROUTES_PATH+"Boost"))
 
 module.exports = router;

@@ -6,6 +6,7 @@ const { filterObject } = require("../../../helpers/utilities");
 exports.getAllMagasins = async (req, res) => {
   Magasin.find({})
     .limit(req.query.num ? req.query.num : 4)
+    .sort({score:-1})
     .then((magasins) => {
       res.send(
         magasins.map((magasin) => ({

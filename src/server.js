@@ -22,6 +22,7 @@ server.use(express.json());
 //require routes
 
 const routes = require("./router");
+const { handleEventListeners } = require("./helpers/eventHandler");
 server.use(routes);
 
 //use errorHandler
@@ -33,6 +34,7 @@ connectDB()
     console.log(
       `database connected host:${con.connection.host},dbname:${con.connection.db.databaseName}`
     );
+    handleEventListeners()
 
     server.listen(process.env.PORT, () => {
       console.log(

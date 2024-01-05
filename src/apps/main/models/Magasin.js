@@ -60,7 +60,21 @@ const magasinSchema = new mongoose.Schema({
     email: String,
     number: String,
     description: String,
-  }
+  },
+  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "BoostRequest" }],
+
+  score: {
+    type: Number,
+    default: 0,
+  },
+
+  activeBoost: {
+    boost: { type: mongoose.Schema.Types.ObjectId, ref: "Boost", default:null },
+    boostType: {
+      type:String,
+      enum:["mega", "standard", null],
+    }
+  },
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);
