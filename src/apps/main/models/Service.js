@@ -18,6 +18,10 @@ const serviceSchema = new mongoose.Schema({
     ref: "Magasin",
     required: true,
   },
+  time: {
+    type: Number,
+    required: true,
+  },
 });
 
 const Service = mongoose.model("Service", serviceSchema);

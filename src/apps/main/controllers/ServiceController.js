@@ -4,8 +4,8 @@ const Magasin = require("../models/Magasin");
 // Create a new service
 exports.createService = async (req, res) => {
   try {
-    const { Name, prix, details, magasin } = req.body;
-    const newService = new Service({ Name, prix, details, magasin });
+    const { Name, prix, time, details, magasin } = req.body;
+    const newService = new Service({ Name, prix, time, details, magasin });
     const savedService = await newService.save();
     await Magasin.findByIdAndUpdate(magasin, {
       $push: { services: savedService._id },
@@ -50,11 +50,11 @@ exports.getServiceById = async (req, res) => {
 // Update a service by ID
 exports.updateServiceById = async (req, res) => {
   const { id } = req.params;
-  const { Name, prix, details } = req.body;
+  const { Name, prix, time, details } = req.body;
   try {
     const updatedService = await Service.findByIdAndUpdate(
       id,
-      { Name, prix, details },
+      { Name, prix, time, details },
       { new: true }
     );
     if (!updatedService) {

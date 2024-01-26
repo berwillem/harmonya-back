@@ -4,17 +4,29 @@ const Category = require("../models/Category");
 const { filterObject } = require("../../../helpers/utilities");
 
 exports.getAllMagasins = async (req, res) => {
-  Magasin.find({})
-    .limit(req.query.num ? req.query.num : 4)
-    .sort({score:-1})
-    .then((magasins) => {
-      res.send(
-        magasins.map((magasin) => ({
-          name: magasin.magasinName,
-          id: magasin._id,
-        }))
-      );
+  try {
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 10;
+
+    const num = req.query.num || 4;
+
+    const magasins = await Magasin.find({})
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ score: -1 });
+
+    const formattedMagasins = magasins.map((magasin) => ({
+      name: magasin.magasinName,
+      id: magasin._id,
+    }));
+
+    return res.status(200).json({ magasins: formattedMagasins });
+  } catch (error) {
+    console.error("Error fetching magasins:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
     });
+  }
 };
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
