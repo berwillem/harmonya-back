@@ -10,5 +10,6 @@ const {
 router.get("/", ServiceController.getAllServices);
 router.post("/", ServiceController.createService);
 router.get("/category/:id", ServiceController.getServicesByCategory)
+router.get("/id/:id", ServiceController.getServiceById)
 module.exports = router;
     
