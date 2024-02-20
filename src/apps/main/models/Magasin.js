@@ -28,10 +28,12 @@ const magasinSchema = new mongoose.Schema({
     },
   ],
   stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Store" }],
-  subscription: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Subscription",
-  },
+  subscriptions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+    },
+  ],
   subscriptionRequest: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "SubscriptionRequest",
@@ -69,11 +71,15 @@ const magasinSchema = new mongoose.Schema({
   },
 
   activeBoost: {
-    boost: { type: mongoose.Schema.Types.ObjectId, ref: "Boost", default:null },
+    boost: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Boost",
+      default: null,
+    },
     boostType: {
-      type:String,
-      enum:["mega", "standard", null],
-    }
+      type: String,
+      enum: ["mega", "standard", null],
+    },
   },
 });
 

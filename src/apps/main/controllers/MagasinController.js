@@ -8,8 +8,6 @@ exports.getAllMagasins = async (req, res) => {
     const page = req.query.page || 1;
     const pageSize = req.query.pageSize || 10;
 
-    const num = req.query.num || 4;
-
     const magasins = await Magasin.find({})
       .skip((page - 1) * pageSize)
       .limit(pageSize)
