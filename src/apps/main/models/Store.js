@@ -4,22 +4,7 @@ const storeSchema = new mongoose.Schema({
   location: {
     type: String,
   },
-  employees: [
-    {
-      nom: {
-        type: String,
-        required: true,
-      },
-      prenom: {
-        type: String,
-        required: true,
-      },
-      fonction: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
+  employees: [{ type: mongoose.Schema.Types.ObjectId, ref: "Employee" }], 
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Magasin",
