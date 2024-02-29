@@ -28,6 +28,11 @@ const serviceSchema = new mongoose.Schema({
       ref: "Store",
     },
   ],
+  images: [
+    {
+      type: String,
+    },
+  ],
 });
 
 const Service = mongoose.model("Service", serviceSchema);
