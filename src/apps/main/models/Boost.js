@@ -8,16 +8,15 @@ const boostSchema = new mongoose.Schema({
   },
   expiryDate: {
     type: Date,
-    expires: 24*60*60,
+    expires: 24 * 60 * 60,
     default: Date.now,
   },
   magasin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Magasin",
-  }
+  },
 });
 
 const Boost = mongoose.model("boost", boostSchema);
-
 
 module.exports = Boost;

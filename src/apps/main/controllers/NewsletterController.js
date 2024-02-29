@@ -26,3 +26,14 @@ exports.subscribeEmail = async (req, res) => {
       .json({ message: "Failed to subscribe to newsletter" });
   }
 };
+exports.getAllSubscribedEmails = async (req, res) => {
+  try {
+    const subscribedEmails = await NewsletterEmail.find();
+    return res.status(200).json({ emails: subscribedEmails });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Failed to retrieve subscribed emails" });
+  }
+};

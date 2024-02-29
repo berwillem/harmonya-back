@@ -1,89 +1,48 @@
+const multer = require("multer");
+const upload = require("../config/multer");
 const cloudinary = require("../config/cloudinaryConfig");
-const Magasin = require("../apps/main/models/Magasin");
 
-exports.uploadImage = async (req, res, next) => {
-  const image = req.file.path;
-  try {
-    const result = await cloudinary.uploader.upload(image);
-    console.log(result);
-    res
-      .status(200)
-      .json({ success: true, message: "Image uploaded successfully" });
-  } catch (error) {
-    console.error("Error uploading image:", error);
-    res.status(500).json({ success: false, message: "Image upload failed" });
-  }
-  next();
+exports.imageUpload = (req, res, next) => {
+  upload.single("image")(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).send("Multer error: " + err.message);
+    } else if (err) {
+      return res.status(500).send("Error: " + err.message);
+    }
+    cloudinary.uploader.upload(req.file.path, (error, result) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).send("Error uploading image to Cloudinary");
+      }
+      req.imageURL = result.secure_url;
+      next();
+    });
+  });
 };
 
-exports.uploadImages = async (req, res, next) => {
-  const images = req.files.map((file) => file.path);
-  try {
-    for (const image of images) {
-      const result = await cloudinary.uploader.upload(image);
-      console.log(result);
+exports.multipleImageUpload = (req, res, next) => {
+  upload.array("images", 10)(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).send("Multer error: " + err.message);
+    } else if (err) {
+      return res.status(500).send("Error: " + err.message);
     }
-    res
-      .status(200)
-      .json({ success: true, message: "Images uploaded successfully" });
-  } catch (error) {
-    console.error("Error uploading images:", error);
-    res.status(500).json({ success: false, message: "Images upload failed" });
-  }
-  next();
-};
-exports.uploadImagesWithSubscription = async (req, res, next) => {
-  try {
-    const magasinId = req.params.magasinId;
-    const magasin = await Magasin.findById(magasinId).populate("subscription");
-
-    if (!magasin) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Magasin not found" });
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).send("No files uploaded.");
     }
-
-    if (!magasin.subscription) {
-      return res.status(400).json({
-        success: false,
-        message: "Magasin does not have a subscription",
+    const uploadedImages = [];
+    req.files.forEach((file) => {
+      cloudinary.uploader.upload(file.path, (error, result) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).send("Error uploading image to Cloudinary");
+        }
+        uploadedImages.push(result.secure_url);
+        if (uploadedImages.length === req.files.length) {
+          req.imageURLs = uploadedImages;
+          next();
+        }
       });
-    }
-
-    // Check if the subscription is active
-    if (!magasin.subscription.active) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Subscription is not active" });
-    }
-
-    // Determine the allowed number of images based on the subscription type
-    let allowedImages = 0;
-    switch (magasin.subscription.type) {
-      case "standard":
-        allowedImages = 4;
-        break;
-      case "premium":
-        allowedImages = 6;
-        break;
-      case "gold":
-        allowedImages = 10;
-        break;
-      default:
-        allowedImages = 0; // Default to 0 for unknown subscription types
-    }
-
-    // Check if the number of uploaded images exceeds the allowed limit
-    if (req.files.length > allowedImages) {
-      return res.status(400).json({
-        success: false,
-        message: `You can upload a maximum of ${allowedImages} images`,
-      });
-    }
-
-    uploadImages(req, res, next);
-  } catch (error) {
-    console.error("Error in uploadImagesWithSubscription:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
+    });
+  });
 };
