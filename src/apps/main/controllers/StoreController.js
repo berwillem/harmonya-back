@@ -12,8 +12,35 @@ exports.createStore = async (req, res) => {
       return res.status(400).json({ error: "Owner ID is required" });
     }
 
-    // Create a new store
-    const newStore = new Store(req.body);
+    // Create an array to hold employee ObjectIds
+    const employeeIds = [];
+
+    // Create employees or retrieve existing ones
+    if (req.body.employees && req.body.employees.length > 0) {
+      for (const employeeData of req.body.employees) {
+        let employeeId;
+        // Check if employee already exists
+        const existingEmployee = await Employee.findOne({
+          nom: employeeData.nom,
+          prenom: employeeData.prenom,
+          fonction: employeeData.fonction,
+        });
+        if (existingEmployee) {
+          employeeId = existingEmployee._id;
+        } else {
+          // Create a new employee
+          const newEmployee = new Employee(employeeData);
+          const savedEmployee = await newEmployee.save();
+          employeeId = savedEmployee._id;
+        }
+        // Add employee ObjectId to array
+        employeeIds.push(employeeId);
+      }
+    }
+
+    // Create a new store with employee references
+    const newStoreData = { ...req.body, employees: employeeIds };
+    const newStore = new Store(newStoreData);
     const savedStore = await newStore.save();
 
     // Add the store ID to the owner's stores array
@@ -23,13 +50,6 @@ exports.createStore = async (req, res) => {
       await magasin.save();
     } else {
       return res.status(404).json({ error: "Magasin not found" });
-    }
-
-    // Create employees if provided
-    if (req.body.employees && req.body.employees.length > 0) {
-      for (const employeeData of req.body.employees) {
-        await createEmployee({ body: employeeData });
-      }
     }
 
     res.status(201).json(savedStore);
