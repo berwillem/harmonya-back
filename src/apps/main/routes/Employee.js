@@ -9,18 +9,18 @@ const {
 } = require("../controllers/employeeController");
 
 // Create a new employee
-router.post("/employees", createEmployee);
+router.post("/", createEmployee);
 
 // Get all employees
-router.get("/employees", getAllEmployees);
+router.get("/", getAllEmployees);
 
 // Get a specific employee by ID
-router.get("/employees/:id", getEmployeeById);
+router.get("/:id", getEmployeeById);
 
 // Update an employee by ID
-router.put("/employees/:id", updateEmployee);
+router.put("/:id", updateEmployee);
 
 // Delete an employee by ID
-router.delete("/employees/:id", deleteEmployee);
+router.delete("/:id", deleteEmployee);
 
 module.exports = router;
