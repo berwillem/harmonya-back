@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   bookmarks: {
     stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Magasin" }],
     services: [{ type: mongoose.Schema.Types.ObjectId, ref: "Service" }],
-    default:{}
+    default: {},
   },
 });
 

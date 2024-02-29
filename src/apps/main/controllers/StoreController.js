@@ -1,5 +1,7 @@
 const Store = require("../models/Store");
 const Magasin = require("../models/Magasin");
+const Employee = require("../models/Employee");
+const { createEmployee } = require("./employeeController");
 
 // CREATE - Create a new store
 exports.createStore = async (req, res) => {
@@ -10,15 +12,24 @@ exports.createStore = async (req, res) => {
       return res.status(400).json({ error: "Owner ID is required" });
     }
 
+    // Create a new store
     const newStore = new Store(req.body);
     const savedStore = await newStore.save();
 
+    // Add the store ID to the owner's stores array
     const magasin = await Magasin.findById(ownerId);
     if (magasin) {
       magasin.stores.push(savedStore._id);
       await magasin.save();
     } else {
       return res.status(404).json({ error: "Magasin not found" });
+    }
+
+    // Create employees if provided
+    if (req.body.employees && req.body.employees.length > 0) {
+      for (const employeeData of req.body.employees) {
+        await createEmployee({ body: employeeData });
+      }
     }
 
     res.status(201).json(savedStore);
@@ -61,6 +72,14 @@ exports.updateStoreById = async (req, res) => {
     if (!updatedStore) {
       return res.status(404).json({ error: "Store not found" });
     }
+
+    // Update employees if provided
+    if (req.body.employees && req.body.employees.length > 0) {
+      for (const employeeData of req.body.employees) {
+        await createEmployee({ body: employeeData }); // Assuming createEmployee accepts req
+      }
+    }
+
     res.status(200).json(updatedStore);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -76,6 +95,13 @@ exports.deleteStoreById = async (req, res) => {
     if (!deletedStore) {
       return res.status(404).json({ error: "Store not found" });
     }
+
+    if (deletedStore.employees && deletedStore.employees.length > 0) {
+      for (const employeeId of deletedStore.employees) {
+        await Employee.findByIdAndDelete(employeeId);
+      }
+    }
+
     res.status(200).json({ message: "Store deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
