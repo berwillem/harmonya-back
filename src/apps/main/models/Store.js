@@ -10,6 +10,11 @@ const storeSchema = new mongoose.Schema({
     ref: "Magasin",
     required: true,
   },
+  baseAgenda: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"Agenda",
+    required:true,
+  }
 });
 
 const Store = mongoose.model("Store", storeSchema);

@@ -15,5 +15,6 @@ router.use("/store", require(ROUTES_PATH + "Store"));
 router.use("/boost", require(ROUTES_PATH + "Boost"));
 router.use("/booking", require(ROUTES_PATH + "Booking"));
 router.use("/employee", require(ROUTES_PATH + "Employee"));
+router.use("/agenda", require(ROUTES_PATH + "Agenda"));
 
 module.exports = router;
