@@ -1,7 +1,6 @@
 const { Router } = require("express");
 
 const ROUTES_PATH = "../../apps/main/routes/";
-const ROUTES_PATH = "../../apps/main/routes/";
 
 const router = Router();
 router.use("/auth/user", require(ROUTES_PATH + "AuthUser"));
