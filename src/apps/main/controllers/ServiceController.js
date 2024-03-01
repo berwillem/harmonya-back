@@ -5,14 +5,29 @@ const Magasin = require("../models/Magasin");
 exports.createService = async (req, res) => {
   try {
     const { Name, prix, time, details, magasin } = req.body;
-    const newService = new Service({ Name, prix, time, details, magasin });
+
+    // Access the uploaded image URLs from the request object
+    const imageURLs = req.imageURLs; // Assuming you stored the URLs in req.imageURLs
+
+    // Create a new service object
+    const newService = new Service({
+      Name,
+      prix,
+      time,
+      details,
+      magasin,
+      images: imageURLs,
+    });
+
     const savedService = await newService.save();
+
     await Magasin.findByIdAndUpdate(magasin, {
       $push: { services: savedService._id },
     });
 
     res.status(201).json(savedService);
   } catch (error) {
+    console.error("Error creating service:", error);
     res
       .status(500)
       .json({ error: "An error occurred while creating the service." });

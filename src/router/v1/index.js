@@ -1,7 +1,6 @@
 const { Router } = require("express");
 
 const ROUTES_PATH = "../../apps/main/routes/";
-
 const router = Router();
 router.use("/auth/user", require(ROUTES_PATH + "AuthUser"));
 router.use("/auth/magasin", require(ROUTES_PATH + "AuthMagasin"));
@@ -14,5 +13,8 @@ router.use("/magasin", require(ROUTES_PATH + "Magasin"));
 router.use("/bookmarks", require(ROUTES_PATH + "Bookmarks"));
 router.use("/store", require(ROUTES_PATH + "Store"));
 router.use("/boost", require(ROUTES_PATH + "Boost"));
+router.use("/booking", require(ROUTES_PATH + "Booking"));
+router.use("/employee", require(ROUTES_PATH + "Employee"));
+router.use("/agenda", require(ROUTES_PATH + "Agenda"));
 
 module.exports = router;

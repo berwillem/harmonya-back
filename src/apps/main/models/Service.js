@@ -22,6 +22,17 @@ const serviceSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  stores: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Store",
+    },
+  ],
+  images: [
+    {
+      type: String,
+    },
+  ],
 });
 
 const Service = mongoose.model("Service", serviceSchema);

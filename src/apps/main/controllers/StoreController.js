@@ -1,5 +1,7 @@
 const Store = require("../models/Store");
 const Magasin = require("../models/Magasin");
+const Employee = require("../models/Employee");
+const { createEmployee } = require("./employeeController");
 
 // CREATE - Create a new store
 exports.createStore = async (req, res) => {
@@ -10,9 +12,38 @@ exports.createStore = async (req, res) => {
       return res.status(400).json({ error: "Owner ID is required" });
     }
 
-    const newStore = new Store(req.body);
+    // Create an array to hold employee ObjectIds
+    const employeeIds = [];
+
+    // Create employees or retrieve existing ones
+    if (req.body.employees && req.body.employees.length > 0) {
+      for (const employeeData of req.body.employees) {
+        let employeeId;
+        // Check if employee already exists
+        const existingEmployee = await Employee.findOne({
+          nom: employeeData.nom,
+          prenom: employeeData.prenom,
+          fonction: employeeData.fonction,
+        });
+        if (existingEmployee) {
+          employeeId = existingEmployee._id;
+        } else {
+          // Create a new employee
+          const newEmployee = new Employee(employeeData);
+          const savedEmployee = await newEmployee.save();
+          employeeId = savedEmployee._id;
+        }
+        // Add employee ObjectId to array
+        employeeIds.push(employeeId);
+      }
+    }
+
+    // Create a new store with employee references
+    const newStoreData = { ...req.body, employees: employeeIds };
+    const newStore = new Store(newStoreData);
     const savedStore = await newStore.save();
 
+    // Add the store ID to the owner's stores array
     const magasin = await Magasin.findById(ownerId);
     if (magasin) {
       magasin.stores.push(savedStore._id);
@@ -61,6 +92,14 @@ exports.updateStoreById = async (req, res) => {
     if (!updatedStore) {
       return res.status(404).json({ error: "Store not found" });
     }
+
+    // Update employees if provided
+    if (req.body.employees && req.body.employees.length > 0) {
+      for (const employeeData of req.body.employees) {
+        await createEmployee({ body: employeeData }); // Assuming createEmployee accepts req
+      }
+    }
+
     res.status(200).json(updatedStore);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -76,6 +115,13 @@ exports.deleteStoreById = async (req, res) => {
     if (!deletedStore) {
       return res.status(404).json({ error: "Store not found" });
     }
+
+    if (deletedStore.employees && deletedStore.employees.length > 0) {
+      for (const employeeId of deletedStore.employees) {
+        await Employee.findByIdAndDelete(employeeId);
+      }
+    }
+
     res.status(200).json({ message: "Store deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
