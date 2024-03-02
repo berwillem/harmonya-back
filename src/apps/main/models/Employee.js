@@ -13,6 +13,16 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  store: {
+    type:mongoose.Schema.Types.ObjectId,
+    required:true,
+  },
+  agenda: {
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"Agenda",
+    required:true,
+  }
+
 });
 
 const Employee = mongoose.model("Employee", employeeSchema);
