@@ -38,6 +38,10 @@ const magasinSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "SubscriptionRequest",
   },
+  trial: {
+    type: Boolean,
+    default: false,
+  },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",

@@ -8,7 +8,7 @@ const subscriptionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["standard", "premium", "gold"],
+    enum: ["trial", "standard", "premium", "gold"],
     required: true,
   },
   active: {
@@ -24,10 +24,6 @@ const subscriptionSchema = new mongoose.Schema({
     },
   },
   paid: {
-    type: Boolean,
-    default: false,
-  },
-  trial: {
     type: Boolean,
     default: false,
   },
