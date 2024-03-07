@@ -35,7 +35,7 @@ const { handleEventListeners } = require("./helpers/eventHandler");
 const updateExpiredSubscriptions = require("./helpers/nodecron");
 server.use(routes);
 // Start the cron job
-// updateExpiredSubscriptions.start();
+updateExpiredSubscriptions.start();
 
 //use errorHandler
 server.use(errorHandler);

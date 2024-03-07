@@ -3,16 +3,20 @@ const Magasin = require("../models/Magasin");
 
 exports.getAllSubscriptionRequests = async (req, res) => {
   try {
-    const subscriptionRequests = await SubscriptionRequest.find();
+    const subscriptionRequests = await SubscriptionRequest.find().populate(
+      "magasin",
+      "magasinName"
+    );
     return res.status(200).json(subscriptionRequests);
   } catch (error) {
     console.error("Error retrieving subscription requests:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
 exports.createSubscriptionRequest = async (req, res) => {
   try {
-    const { magasinId, type, request } = req.body;
+    const { magasinId, type, request, duration } = req.body;
     if (!magasinId || !type || !request) {
       return res
         .status(400)
@@ -32,6 +36,7 @@ exports.createSubscriptionRequest = async (req, res) => {
       magasin: magasinId,
       type,
       request,
+      duration,
     });
     await subscriptionRequest.save();
     return res

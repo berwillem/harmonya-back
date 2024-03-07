@@ -5,11 +5,7 @@ const Magasin = require("../models/Magasin");
 exports.createService = async (req, res) => {
   try {
     const { Name, prix, time, details, magasin } = req.body;
-
-    // Access the uploaded image URLs from the request object
-    const imageURLs = req.imageURLs; // Assuming you stored the URLs in req.imageURLs
-
-    // Create a new service object
+    const imageURLs = req.imageURLs;
     const newService = new Service({
       Name,
       prix,
