@@ -1,21 +1,22 @@
 const Agenda = require("../models/Agenda");
+const Store = require("../models/Store");
 
 exports.createAgendaAPI = async (req, res) => {
   try {
-    console.log(req.body.agenda)
+    console.log(req.body.agenda);
     const newagenda = new Agenda(req.body);
     const savedAgenda = await newagenda.save();
-    return res.status(201).json(savedAgenda)
+    return res.status(201).json(savedAgenda);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-exports.createAgenda = async (agendaMatrix) => {
+exports.createAgenda = async (agenda) => {
   try {
-    const agenda = new Agenda({ agenda: agendaMatrix });
-    savedAgenda = await agenda.save();
+    const agendaObj = new Agenda(agenda);
+    savedAgenda = await agendaObj.save();
     return savedAgenda;
   } catch (err) {
     console.error(err);
@@ -36,7 +37,7 @@ exports.deleteAgenda = async (req, res) => {
   }
 };
 
-exports.updateAgenda = async (req, res) => {
+exports.updateAgendaAPI = async (req, res) => {
   try {
     const updatedAgenda = await Agenda.findByIdAndUpdate(
       req.params.id,
@@ -47,6 +48,23 @@ exports.updateAgenda = async (req, res) => {
       return res.status(404).json({ message: "Agenda not found" });
     }
     return res.status(200).json(updatedAgenda);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.updateAgenda = async (id, agenda) => {
+  try {
+    const updatedAgenda = await Agenda.findByIdAndUpdate(
+      id,
+      { agenda },
+      { new: true }
+    );
+    if (!updatedAgenda) {
+      return false;
+    }
+    return updatedAgenda;
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Internal server error" });
@@ -109,12 +127,110 @@ exports.combineAgenda = (agendas) => {
       return combineDay(accumulator[index], nextagenda[index]);
     });
   }, result);
-  // result = result.map((elem, index)=>{
-  //   return combineDay(agenda1[index],agenda2[index])
-
-  // })
 
   return result;
 };
 
+exports.refreshAgenda = async (storeId) => {
+  try {
+    const store = await Store.findById(storeId).populate({
+      path: "employees",
+      select: "agenda",
+      populate: {
+        path: "agenda",
+        select: "agenda -_id",
+      },
+    });
 
+    const empAgendas = store.employees.map(
+      (employee) => employee.agenda.agenda
+    );
+
+    const updatedAgenda = await exports.updateAgenda(
+      store.displayAgenda,
+      exports.combineAgenda(empAgendas)
+    );
+
+    return updatedAgenda;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.AgendaToDate = async (agendaId, agendaTime) => {
+  try {
+    const agenda = await Agenda.findById(agendaId);
+    const result = new Date(agenda.startDate);
+    result.setDate(result.getDate() + agendaTime.day);
+    const agendaDay = agenda.agenda[agendaTime.day];
+    // const dayLength = agendaDay[1].length * (agenda.unit / 60);
+    result.setHours(
+      agendaDay[0] + Math.floor(agendaTime.index * (agenda.unit / 60)),
+      (agendaTime.index * agenda.unit) % 60,0,
+      0
+      
+    );
+    return result;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.dateToAgenda = async (agendaId, date)=>{
+  try {
+    const agenda = await Agenda.findById(agendaId);
+    const result = {
+      day:0,
+      index:0,
+    }
+    
+    result.day = Math.floor((date.getTime()- agenda.startDate.getTime())/ (1000 * 3600 * 24))
+    if(result.day <0 || result.day >30){
+      console.error("Date outside agenda")
+      return false
+    }
+    let day = agenda.agenda[result.day]
+    let minutes = (date.getHours()-day[0])*60 + date.getMinutes()
+    if(minutes<0){
+      console.error("Date before starting hours")
+      return false
+    }
+    result.index = Math.floor(minutes/agenda.unit)
+    return result
+  } catch (error) {
+    console.log(date.getTime())
+    console.error(error)
+  }
+}
+
+exports.agendaTimeAvailable = async (agendaId, agendaTime) => {
+  try {
+    const agenda = await Agenda.findById(agendaId)
+    const {day, index} = agendaTime
+    
+    if(agenda.agenda[day][1][index]){
+      return true
+    }else{
+      return false
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+exports.agendaToggle = async (agendaId, agendaTime) => {
+  console.log("toggle function triggered")
+  try {
+    const agenda = await Agenda.findById(agendaId)
+    const {day, index} = agendaTime
+    console.log("agendaTime:", agendaTime)
+    console.log("agenda:", agenda.agenda[day])
+    agenda.agenda[day][1][index] = agenda.agenda[day][1][index] == 1 ? 0 : 1
+    agenda.markModified('agenda')
+    console.log("agenda:", agenda.agenda[day])
+    await agenda.save()
+    return true
+  }catch(error){
+    console.error(error)
+  }
+}

@@ -1,14 +1,19 @@
 const Employee = require("../models/Employee");
+const { createAgenda } = require("./AgendaController");
+const Store = require("../models/Store")
 
 // Create a new employee
 exports.createEmployee = async (req, res) => {
   try {
     const { nom, prenom, fonction, store } = req.body;
-    const employee = new Employee({ nom, prenom, fonction });
+    const storeObj = await Store.findById(store).populate("baseAgenda")
+    const agendaObject = storeObj.baseAgenda
+    const agenda = await createAgenda(agendaObject)
+    const employee = new Employee({ nom, prenom, fonction, store, agenda });
     await employee.save();
-    res.status(201).json(employee);
+    return res.status(201).json(employee);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -21,6 +26,21 @@ exports.getAllEmployees = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.createEmployeeLocal = async ({ nom, prenom, fonction, store }) => {
+  try {
+    const storeObj = await Store.findById(store).populate("baseAgenda")
+    const agendaObject = storeObj.baseAgenda
+    const agenda = await createAgenda(agendaObject)
+    const employee = new Employee({ nom, prenom, fonction, store, agenda });
+    await employee.save();
+    return employee
+  } catch (error) {
+    console.error(error)
+    return false
+  }
+};
+
 
 // Get a specific employee by ID
 exports.getEmployeeById = async (req, res) => {
@@ -68,3 +88,14 @@ exports.deleteEmployee = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getEmployeeAgenda = async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.body.employee).populate('agenda')
+    return res.status(200).json(employee.agenda)
+
+  }catch(error){
+    console.error(error)
+    return res.status(500).json({message:"Internal Server error"})
+  }
+}

@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Store = require("./Store");
+const { refreshAgenda } = require("../controllers/AgendaController");
 
 const employeeSchema = new mongoose.Schema({
   nom: {
@@ -24,6 +26,17 @@ const employeeSchema = new mongoose.Schema({
   }
 
 });
+
+employeeSchema.post('save', async (emp)=>{
+  try{
+    const store = await Store.findById(emp.store);
+    store.employees.push(emp._id)
+    await store.save()
+    await refreshAgenda(emp.store)
+  }catch(error){
+    console.error(error)
+  }
+})
 
 const Employee = mongoose.model("Employee", employeeSchema);
 

@@ -6,7 +6,8 @@ const {
   getEmployeeById,
   updateEmployee,
   deleteEmployee,
-} = require("../controllers/employeeController");
+  getEmployeeAgenda,
+} = require("../controllers/EmployeeController");
 
 // Create a new employee
 router.post("/", createEmployee);
@@ -22,5 +23,7 @@ router.put("/:id", updateEmployee);
 
 // Delete an employee by ID
 router.delete("/:id", deleteEmployee);
+
+router.get("/agenda/:id", getEmployeeAgenda)
 
 module.exports = router;

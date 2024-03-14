@@ -1,48 +1,43 @@
 const Store = require("../models/Store");
 const Magasin = require("../models/Magasin");
 const Employee = require("../models/Employee");
-const { createEmployee } = require("./employeeController");
+const Agenda = require("../models/Agenda");
+const { createEmployee, createEmployeeLocal } = require("./EmployeeController");
+const {
+  combineAgenda,
+  createAgenda,
+  updateAgenda,
+} = require("./AgendaController");
 
 // CREATE - Create a new store
 exports.createStore = async (req, res) => {
   try {
     const ownerId = req.body.owner;
+    const {agenda, wilaya, location,owner} = req.body
+    const baseAgenda = await createAgenda(agenda)
+    console.log(baseAgenda)
+    const displayAgenda = await createAgenda(agenda)
 
     if (!ownerId) {
       return res.status(400).json({ error: "Owner ID is required" });
     }
 
-    // Create an array to hold employee ObjectIds
-    const employeeIds = [];
-
-    // Create employees or retrieve existing ones
-    if (req.body.employees && req.body.employees.length > 0) {
-      for (const employeeData of req.body.employees) {
-        let employeeId;
-        // Check if employee already exists
-        const existingEmployee = await Employee.findOne({
-          nom: employeeData.nom,
-          prenom: employeeData.prenom,
-          fonction: employeeData.fonction,
-        });
-        if (existingEmployee) {
-          employeeId = existingEmployee._id;
-        } else {
-          // Create a new employee
-          const newEmployee = new Employee(employeeData);
-          const savedEmployee = await newEmployee.save();
-          employeeId = savedEmployee._id;
-        }
-        // Add employee ObjectId to array
-        employeeIds.push(employeeId);
-      }
-    }
+    
 
     // Create a new store with employee references
-    const newStoreData = { ...req.body, employees: employeeIds };
+    const newStoreData = { wilaya, location, owner, employees:[] , baseAgenda:baseAgenda._id, displayAgenda:displayAgenda._id};
     const newStore = new Store(newStoreData);
     const savedStore = await newStore.save();
 
+    if (req.body.employees && req.body.employees.length > 0) {
+      for (const employeeData of req.body.employees) {
+        let employeeId;
+        
+        // Create a new employee
+        await createEmployeeLocal({ ...employeeData, store:savedStore._id});
+        
+      }
+    }
     // Add the store ID to the owner's stores array
     const magasin = await Magasin.findById(ownerId);
     if (magasin) {
@@ -127,3 +122,4 @@ exports.deleteStoreById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+

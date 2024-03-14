@@ -28,6 +28,11 @@ const bookingRequestSchema = new mongoose.Schema({
     ref: "Service",
     required: true,
   },
+
+  confirmed: {
+    type: Boolean,
+    default:false,
+  }
 });
 
 const BookingRequest = mongoose.model("BookingRequest", bookingRequestSchema);
