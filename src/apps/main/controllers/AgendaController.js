@@ -163,12 +163,11 @@ exports.AgendaToDate = async (agendaId, agendaTime) => {
     const result = new Date(agenda.startDate);
     result.setDate(result.getDate() + agendaTime.day);
     const agendaDay = agenda.agenda[agendaTime.day];
-    // const dayLength = agendaDay[1].length * (agenda.unit / 60);
     result.setHours(
       agendaDay[0] + Math.floor(agendaTime.index * (agenda.unit / 60)),
-      (agendaTime.index * agenda.unit) % 60,0,
+      (agendaTime.index * agenda.unit) % 60,
+      0,
       0
-      
     );
     return result;
   } catch (error) {
@@ -176,61 +175,63 @@ exports.AgendaToDate = async (agendaId, agendaTime) => {
   }
 };
 
-exports.dateToAgenda = async (agendaId, date)=>{
+exports.dateToAgenda = async (agendaId, date) => {
   try {
     const agenda = await Agenda.findById(agendaId);
     const result = {
-      day:0,
-      index:0,
+      day: 0,
+      index: 0,
+    };
+
+    result.day = Math.floor(
+      (date.getTime() - agenda.startDate.getTime()) / (1000 * 3600 * 24)
+    );
+    if (result.day < 0 || result.day > 30) {
+      console.error("Date outside agenda");
+      return false;
     }
-    
-    result.day = Math.floor((date.getTime()- agenda.startDate.getTime())/ (1000 * 3600 * 24))
-    if(result.day <0 || result.day >30){
-      console.error("Date outside agenda")
-      return false
+    let day = agenda.agenda[result.day];
+    let minutes = (date.getHours() - day[0]) * 60 + date.getMinutes();
+    if (minutes < 0) {
+      console.error("Date before starting hours");
+      return false;
     }
-    let day = agenda.agenda[result.day]
-    let minutes = (date.getHours()-day[0])*60 + date.getMinutes()
-    if(minutes<0){
-      console.error("Date before starting hours")
-      return false
-    }
-    result.index = Math.floor(minutes/agenda.unit)
-    return result
+    result.index = Math.floor(minutes / agenda.unit);
+    return result;
   } catch (error) {
-    console.log(date.getTime())
-    console.error(error)
+    console.log(date.getTime());
+    console.error(error);
   }
-}
+};
 
 exports.agendaTimeAvailable = async (agendaId, agendaTime) => {
   try {
-    const agenda = await Agenda.findById(agendaId)
-    const {day, index} = agendaTime
-    
-    if(agenda.agenda[day][1][index]){
-      return true
-    }else{
-      return false
+    const agenda = await Agenda.findById(agendaId);
+    const { day, index } = agendaTime;
+
+    if (agenda.agenda[day][1][index]) {
+      return true;
+    } else {
+      return false;
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
 exports.agendaToggle = async (agendaId, agendaTime) => {
-  console.log("toggle function triggered")
+  console.log("toggle function triggered");
   try {
-    const agenda = await Agenda.findById(agendaId)
-    const {day, index} = agendaTime
-    console.log("agendaTime:", agendaTime)
-    console.log("agenda:", agenda.agenda[day])
-    agenda.agenda[day][1][index] = agenda.agenda[day][1][index] == 1 ? 0 : 1
-    agenda.markModified('agenda')
-    console.log("agenda:", agenda.agenda[day])
-    await agenda.save()
-    return true
-  }catch(error){
-    console.error(error)
+    const agenda = await Agenda.findById(agendaId);
+    const { day, index } = agendaTime;
+    console.log("agendaTime:", agendaTime);
+    console.log("agenda:", agenda.agenda[day]);
+    agenda.agenda[day][1][index] = agenda.agenda[day][1][index] == 1 ? 0 : 1;
+    agenda.markModified("agenda");
+    console.log("agenda:", agenda.agenda[day]);
+    await agenda.save();
+    return true;
+  } catch (error) {
+    console.error(error);
   }
-}
+};
