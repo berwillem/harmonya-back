@@ -1,8 +1,11 @@
 const express = require("express");
-const router = express.Router({ mergeParams: true });
-const SubsciptionController = require("../controllers/SubsciptionController");
+const router = express.Router();
+const {
+  createTrialSubscription,
+  startSubscription,
+} = require("../controllers/SubsciptionController");
 
-// user auth routes :
-router.post("/trial", SubsciptionController.startFreeTrial);
+router.post("/trial", createTrialSubscription);
+router.post("/", startSubscription);
 
 module.exports = router;

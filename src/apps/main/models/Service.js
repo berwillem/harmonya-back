@@ -20,7 +20,6 @@ const serviceSchema = new mongoose.Schema({
   },
   time: {
     type: Number,
-    required: true,
   },
   stores: [
     {

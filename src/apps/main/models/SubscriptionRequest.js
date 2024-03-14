@@ -15,6 +15,10 @@ const subscriptionRequestSchema = new mongoose.Schema({
     type: String,
     enum: ["new", "renew"],
   },
+  duration: {
+    type: String,
+    enum: ["month", "year"],
+  },
 });
 
 const SubscriptionRequest = mongoose.model(
