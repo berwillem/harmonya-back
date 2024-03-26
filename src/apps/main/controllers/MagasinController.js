@@ -78,3 +78,18 @@ exports.getMagasinsByCategory = async (req, res) => {
     return res.status(400).json({ message: "mouchkil" });
   }
 };
+
+exports.getMagasinStores = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const magasin = await Magasin.findById(id).select("stores").populate("stores")
+    if(!magasin){
+      return res.status(400).json({message:"Magasin not found."})
+    }
+    return res.status(200).json(magasin.stores)
+  }catch(error){
+    console.error(error)
+    return res.status(500).json({message:"Interal Server Error"})
+  }
+}

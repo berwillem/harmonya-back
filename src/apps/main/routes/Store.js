@@ -19,4 +19,8 @@ router.put("/:id", StoreController.updateStoreById);
 // DELETE - Delete a specific store by ID
 router.delete("/:id", StoreController.deleteStoreById);
 
+router.get("/agenda/:id", StoreController.getStoreAgenda)
+
+router.get("/employees/:id", StoreController.getStoreEmployees)
+
 module.exports = router;

@@ -3,7 +3,7 @@ const Store = require("../models/Store");
 
 exports.createAgendaAPI = async (req, res) => {
   try {
-    console.log(req.body.agenda);
+    // console.log(req.body.agenda);
     const newagenda = new Agenda(req.body);
     const savedAgenda = await newagenda.save();
     return res.status(201).json(savedAgenda);
@@ -177,6 +177,8 @@ exports.AgendaToDate = async (agendaId, agendaTime) => {
 
 exports.dateToAgenda = async (agendaId, date) => {
   try {
+    // console.log(date.getHours())
+    // console.log("date.getMinutes(): ", date.getMinutes())
     const agenda = await Agenda.findById(agendaId);
     const result = {
       day: 0,
@@ -191,7 +193,9 @@ exports.dateToAgenda = async (agendaId, date) => {
       return false;
     }
     let day = agenda.agenda[result.day];
+    // console.log("day[0]: ", day[0])
     let minutes = (date.getHours() - day[0]) * 60 + date.getMinutes();
+    // console.log("minutes: ", minutes)
     if (minutes < 0) {
       console.error("Date before starting hours");
       return false;
@@ -199,7 +203,7 @@ exports.dateToAgenda = async (agendaId, date) => {
     result.index = Math.floor(minutes / agenda.unit);
     return result;
   } catch (error) {
-    console.log(date.getTime());
+    // console.log(date.getTime());
     console.error(error);
   }
 };
@@ -220,18 +224,42 @@ exports.agendaTimeAvailable = async (agendaId, agendaTime) => {
 };
 
 exports.agendaToggle = async (agendaId, agendaTime) => {
-  console.log("toggle function triggered");
+  // console.log("toggle function triggered");
   try {
     const agenda = await Agenda.findById(agendaId);
     const { day, index } = agendaTime;
-    console.log("agendaTime:", agendaTime);
-    console.log("agenda:", agenda.agenda[day]);
+    // console.log("agendaTime:", agendaTime);
+    // console.log("agenda:", agenda.agenda[day]);
     agenda.agenda[day][1][index] = agenda.agenda[day][1][index] == 1 ? 0 : 1;
     agenda.markModified("agenda");
-    console.log("agenda:", agenda.agenda[day]);
+    // console.log("agenda:", agenda.agenda[day]);
     await agenda.save();
     return true;
   } catch (error) {
     console.error(error);
   }
+};
+
+exports.testFeature = async (req, res) => {
+  try {
+    const agendas = await Agenda.find({}).select("agenda startDate")
+    let i = 0
+    const bulkOps = agendas.map(agenda => ({
+      updateOne: {
+        filter: { _id: agenda._id },
+        update: {
+          $set: {
+            startDate: new Date(agenda.startDate.setHours(24, 0, 0, 0)),
+            agenda: agenda.agenda.slice(1)
+          }
+        }
+      }
+    }));
+    await Agenda.bulkWrite(bulkOps);
+    return res.status(200).json({message:"success"})
+  } catch(error) {
+    console.error("Error updating agendas")
+    return res.status(500).json({message:"failed"})
+  }
+
 };

@@ -1,7 +1,8 @@
 const cron = require("node-cron");
 const Subscription = require("../apps/main/models/Subscription");
+const Agenda = require("../apps/main/models/Agenda")
 
-const updateExpiredSubscriptions = cron.schedule("0 0 * * *", async () => {
+exports.updateExpiredSubscriptions = cron.schedule("0 0 * * *", async () => {
   try {
     const expiredSubscriptions = await Subscription.find({
       "dates.end": { $lte: new Date() },
@@ -19,4 +20,24 @@ const updateExpiredSubscriptions = cron.schedule("0 0 * * *", async () => {
   }
 });
 
-module.exports = updateExpiredSubscriptions;
+exports.updateAgendas = cron.schedule("0 23 * * *", async () => {
+  try {
+    const agendas = await Agenda.find({}).select("agenda startDate")
+    const bulkOps = agendas.map(agenda => ({
+      updateOne: {
+        filter: { _id: agenda._id },
+        update: {
+          $set: {
+            startDate: new Date(agenda.startDate.setHours(24, 0, 0, 0)),
+            agenda: agenda.agenda.slice(1)
+          }
+        }
+      }
+    }));
+    await Agenda.bulkWrite(bulkOps);
+  } catch(error) {
+    console.error("Error updating agendas")
+  }
+})
+
+// module.exports = updateExpiredSubscriptions;
