@@ -30,32 +30,6 @@ exports.addCategory = async (req, res) => {
   }
 };
 
-// Update a category by ID
-exports.updateCategory = async (req, res) => {
-  const { id } = req.params;
-  const { name } = req.body;
-
-  try {
-    const updatedCategory = await Category.findByIdAndUpdate(
-      id,
-      { categoryName: name },
-      { new: true }
-    );
-
-    if (!updatedCategory) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-
-    return res.json({
-      message: "Category updated successfully",
-      category: updatedCategory,
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Failed to update category" });
-  }
-};
-
 // Delete a category by ID
 exports.deleteCategory = async (req, res) => {
   const { id } = req.params;
