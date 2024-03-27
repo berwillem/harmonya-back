@@ -47,3 +47,21 @@ exports.createSubscriptionRequest = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.deleteSubscriptionRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedSubscriptionRequest =
+      await SubscriptionRequest.findByIdAndDelete(id);
+    if (!deletedSubscriptionRequest) {
+      return res
+        .status(404)
+        .json({ message: "Subscription request not found." });
+    }
+    return res
+      .status(200)
+      .json({ message: "Subscription request deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting subscription request:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};

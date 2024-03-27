@@ -49,7 +49,7 @@ exports.createTrialSubscription = async (req, res) => {
 };
 exports.startSubscription = async (req, res) => {
   try {
-    const { magasinId, type, startDate, endDate, paid } = req.body;
+    const { magasinId, type, startDate, endDate, paid } = req.body.data;
     if (!magasinId || !type || !startDate || !endDate) {
       return res.status(400).json({
         message: "Magasin ID, type, start date, and end date are required.",
