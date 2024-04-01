@@ -7,18 +7,18 @@ exports.getAllMagasins = async (req, res) => {
   try {
     const page = req.query.page || 1;
     const pageSize = req.query.pageSize || 10;
-
+    const totalCount = await Magasin.countDocuments();
+    const totalPages = Math.ceil(totalCount / pageSize);
     const magasins = await Magasin.find({})
       .skip((page - 1) * pageSize)
       .limit(pageSize)
       .sort({ score: -1 });
-
     const formattedMagasins = magasins.map((magasin) => ({
       name: magasin.magasinName,
       id: magasin._id,
     }));
 
-    return res.status(200).json({ magasins: formattedMagasins });
+    return res.status(200).json({ magasins: formattedMagasins, totalPages });
   } catch (error) {
     console.error("Error fetching magasins:", error);
     return res.status(500).json({
@@ -26,6 +26,7 @@ exports.getAllMagasins = async (req, res) => {
     });
   }
 };
+
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
   console.log(req.body);
@@ -83,13 +84,30 @@ exports.getMagasinStores = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const magasin = await Magasin.findById(id).select("stores").populate("stores")
-    if(!magasin){
-      return res.status(400).json({message:"Magasin not found."})
+    const magasin = await Magasin.findById(id)
+      .select("stores")
+      .populate("stores");
+    if (!magasin) {
+      return res.status(400).json({ message: "Magasin not found." });
     }
-    return res.status(200).json(magasin.stores)
-  }catch(error){
-    console.error(error)
-    return res.status(500).json({message:"Interal Server Error"})
+    return res.status(200).json(magasin.stores);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Interal Server Error" });
   }
-}
+};
+exports.deleteMagasin = async (req, res) => {
+  const { magasinid } = req.params;
+
+  try {
+    const magasin = await Magasin.findById(magasinid);
+    if (!magasin) {
+      return res.status(404).json({ message: "Magasin not found." });
+    }
+    await Magasin.findByIdAndDelete(magasinid);
+    return res.status(200).json({ message: "Magasin deleted successfully." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
