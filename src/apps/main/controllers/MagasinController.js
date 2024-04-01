@@ -44,6 +44,7 @@ exports.setMagasinInfo = async (req, res) => {
 
 exports.getMagasinServices = async (req, res) => {
   const { magasinId } = req.query;
+  
   try {
     const { services } = await Magasin.findOne({ _id: magasinId });
     return res.status(201).json(await Service.find({ _id: { $in: services } }));
@@ -53,10 +54,25 @@ exports.getMagasinServices = async (req, res) => {
 };
 
 exports.getMagasinInfos = async (req, res) => {
-  const { magasinId } = req.query;
+  const { magasinId, userId } = req.query;
   try {
-    const { infos } = await Magasin.findOne({ _id: magasinId });
-    return res.status(201).json(infos);
+    
+    const magasin = await Magasin.findOne({ _id: magasinId });
+    if(magasin){
+      if(userId){        
+        if(!magasin.visits.userList.includes(userId)){
+          magasin.visits.userList.push(userId)
+          magasin.visits.auth++;
+        }
+        magasin.markModified("visits.userList")
+      }else{
+        magasin.visits.noAuth++;
+      }
+      await magasin.save()
+    }else{
+      return res.status(404).json({message: "Magasin Not Found"})
+    }
+    return res.status(201).json(magasin.infos);
   } catch (error) {
     return res.status(400).json({ message: "mouchkil" });
   }

@@ -29,7 +29,10 @@ exports.getAllEmployees = async (req, res) => {
 
 exports.createEmployeeLocal = async ({ nom, prenom, fonction, store }) => {
   try {
-    const storeObj = await Store.findById(store).populate("baseAgenda")
+    const storeObj = await Store.findById(store).populate({
+      path:"baseAgenda",
+      select:"-_id"
+    })
     const agendaObject = storeObj.baseAgenda
     const agenda = await createAgenda(agendaObject)
     const employee = new Employee({ nom, prenom, fonction, store, agenda });

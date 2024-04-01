@@ -85,6 +85,37 @@ const magasinSchema = new mongoose.Schema({
       enum: ["mega", "standard", null],
     },
   },
+
+  visits: {
+    auth: [
+      {
+        year: {
+          type: Number,
+          default: new Date().getFullYear,
+        },
+        days: {
+          type: Array,
+          default: () => {
+            if (new Date().getFullYear() % 4 === 0) {
+              return Array(366).fill(0)
+            }else{
+              return Array(365).fill(0)
+            }
+          },
+        },
+      },
+    ],
+    noAuth: {
+      type: Number,
+      default: 0,
+    },
+    userList: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+  },
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);
