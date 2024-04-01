@@ -117,7 +117,7 @@ exports.forgotPasswordUser = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    // Handle the case of user not found here if needed
+    // Handle the case of user not found he re if needed
     res.status(404).json({ success: false, message: "User not found" });
     return;
   }
@@ -179,4 +179,3 @@ exports.resetpassword = async (req, res) => {
     message: "Password updated",
   });
 };
-
