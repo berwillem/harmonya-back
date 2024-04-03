@@ -190,7 +190,7 @@ exports.resetpassword = async (req, res) => {
   if (isSame) return sendError(res, "New password Must be different");
   if (password.trim().length < 8 || password.trim().length > 20)
     return sendError(res, "password must be 8 to 20 caracters");
-    magasin.password = password.trim();
+  magasin.password = password.trim();
   await magasin.save();
   await ResetToken.findOneAndDelete({ owner: magasin._id });
   res.status(200).json({

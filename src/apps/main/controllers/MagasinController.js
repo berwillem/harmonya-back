@@ -1,6 +1,5 @@
 const Magasin = require("../models/Magasin");
 const Service = require("../models/Service");
-const Category = require("../models/Category");
 const { filterObject } = require("../../../helpers/utilities");
 
 exports.getAllMagasins = async (req, res) => {
@@ -45,7 +44,7 @@ exports.setMagasinInfo = async (req, res) => {
 
 exports.getMagasinServices = async (req, res) => {
   const { magasinId } = req.query;
-  
+
   try {
     const { services } = await Magasin.findOne({ _id: magasinId });
     return res.status(201).json(await Service.find({ _id: { $in: services } }));
@@ -57,21 +56,20 @@ exports.getMagasinServices = async (req, res) => {
 exports.getMagasinInfos = async (req, res) => {
   const { magasinId, userId } = req.query;
   try {
-    
     const magasin = await Magasin.findOne({ _id: magasinId });
-    if(magasin){
-      if(userId){        
-        if(!magasin.visits.userList.includes(userId)){
-          magasin.visits.userList.push(userId)
+    if (magasin) {
+      if (userId) {
+        if (!magasin.visits.userList.includes(userId)) {
+          magasin.visits.userList.push(userId);
           magasin.visits.auth++;
         }
-        magasin.markModified("visits.userList")
-      }else{
+        magasin.markModified("visits.userList");
+      } else {
         magasin.visits.noAuth++;
       }
-      await magasin.save()
-    }else{
-      return res.status(404).json({message: "Magasin Not Found"})
+      await magasin.save();
+    } else {
+      return res.status(404).json({ message: "Magasin Not Found" });
     }
     return res.status(201).json(magasin.infos);
   } catch (error) {
@@ -122,6 +120,23 @@ exports.deleteMagasin = async (req, res) => {
     }
     await Magasin.findByIdAndDelete(magasinid);
     return res.status(200).json({ message: "Magasin deleted successfully." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+exports.updateMagasinTour = async (req, res) => {
+  const { magasinid } = req.params;
+  try {
+    const magasin = await Magasin.findById(magasinid);
+    if (!magasin) {
+      return res.status(404).json({ message: "Magasin not found." });
+    }
+    magasin.tour = true;
+    await magasin.save();
+    return res
+      .status(200)
+      .json({ message: "Magasin tour updated successfully." });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
