@@ -13,10 +13,11 @@ exports.createAgendaAPI = async (req, res) => {
   }
 };
 
-exports.createAgenda = async (agenda) => {
+exports.createAgenda = async ({agenda, unit, startDate}) => {
   try {
-    const agendaObj = new Agenda(agenda);
-    savedAgenda = await agendaObj.save();
+    console.log("create agenda parameter:",{agenda, unit, startDate})
+    const agendaObj = new Agenda({agenda, unit, startDate});
+    const savedAgenda = await agendaObj.save();
     return savedAgenda;
   } catch (err) {
     console.error(err);
