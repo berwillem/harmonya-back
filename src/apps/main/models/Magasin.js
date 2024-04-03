@@ -21,6 +21,14 @@ const magasinSchema = new mongoose.Schema({
     type: String,
     default: "Magasin",
   },
+  tour: {
+    type: Boolean,
+    default: false,
+  },
+  completedauth: {
+    type: Boolean,
+    default: false,
+  },
   services: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -97,9 +105,9 @@ const magasinSchema = new mongoose.Schema({
           type: Array,
           default: () => {
             if (new Date().getFullYear() % 4 === 0) {
-              return Array(366).fill(0)
-            }else{
-              return Array(365).fill(0)
+              return Array(366).fill(0);
+            } else {
+              return Array(365).fill(0);
             }
           },
         },
