@@ -1,3 +1,4 @@
+const Boost = require("../models/Boost");
 const BoostRequest = require("../models/BoostRequest");
 const Magasin = require("../models/Magasin");
 
@@ -25,7 +26,9 @@ exports.createBoostRequest = async (req, res) => {
 exports.validateBoostRequest = async (req, res) => {
   const { requestId } = req.body;
   try {
-    await BoostRequest.findByIdAndUpdate(requestId, { $set: {validation:true} });
+    await BoostRequest.findByIdAndUpdate(requestId, {
+      $set: { validation: true },
+    });
     return res.status(201).json({ message: "Request Validated Successfuly" });
   } catch (error) {
     console.log(error);
@@ -37,15 +40,15 @@ exports.cancelBoostRequest = async (req, res) => {
   const { requestId } = req.params;
   try {
     const deletedReq = await BoostRequest.findByIdAndDelete(requestId);
-    if(!deletedReq){
-      return res.status(404).json({message:"Request Not found."})
+    if (!deletedReq) {
+      return res.status(404).json({ message: "Request Not found." });
     }
     return res.status(201).json({ message: "Request removed Successfuly." });
-  }catch(error){
-    console.log(error)
+  } catch (error) {
+    console.log(error);
     return res.status(500).json("Internal Server Error.");
   }
-}
+};
 
 exports.BoostRequestEventListeners = () => {
   const changeStream = BoostRequest.watch();
@@ -68,4 +71,22 @@ exports.BoostRequestEventListeners = () => {
         });
     }
   });
+};
+
+exports.getAllBoostRequests = async (req, res) => {
+  try {
+    const boostreq = await BoostRequest.find();
+    res.send(boostreq);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
+exports.getallBoosts = async (req, res) => {
+  try {
+    const boost = await Boost.find();
+    res.send(boost);
+  } catch (err) {
+    res.status(400).send(err);
+  }
 };
