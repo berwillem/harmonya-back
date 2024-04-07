@@ -119,3 +119,18 @@ exports.updateSubscription = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.getSubscriptionsByMagasinId = async (req, res) => {
+  try {
+    const { magasinId } = req.params;
+    const subscriptions = await Subscription.find({ magasin: magasinId });
+    if (!subscriptions) {
+      return res
+        .status(404)
+        .json({ message: "Subscriptions not found for this magasin." });
+    }
+    return res.status(200).json(subscriptions);
+  } catch (error) {
+    console.error("Error retrieving subscriptions:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};

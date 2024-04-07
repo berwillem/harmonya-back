@@ -9,14 +9,16 @@ exports.imageUpload = (req, res, next) => {
     } else if (err) {
       return res.status(500).send("Error: " + err.message);
     }
-    cloudinary.uploader.upload(req.file.path, (error, result) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).send("Error uploading image to Cloudinary");
-      }
-      req.imageURL = result.secure_url;
-      next();
-    });
+    if (req.file) {
+      cloudinary.uploader.upload(req.file.path, (error, result) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).send("Error uploading image to Cloudinary");
+        }
+        req.imageURL = result.secure_url;
+      });
+    }
+    next();
   });
 };
 
@@ -28,17 +30,17 @@ exports.multipleImageUpload = (req, res, next) => {
       return res.status(500).send("Error: " + err.message);
     }
     if (!req.files || req.files.length === 0) {
-      return res.status(400).send("No files uploaded.");
+      return next();
     }
     const uploadedImages = [];
-    req.files.forEach((file) => {
+    req.files.forEach((file, index, array) => {
       cloudinary.uploader.upload(file.path, (error, result) => {
         if (error) {
           console.error(error);
           return res.status(500).send("Error uploading image to Cloudinary");
         }
         uploadedImages.push(result.secure_url);
-        if (uploadedImages.length === req.files.length) {
+        if (uploadedImages.length === array.length) {
           req.imageURLs = uploadedImages;
           next();
         }
