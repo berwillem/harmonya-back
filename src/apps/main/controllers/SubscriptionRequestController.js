@@ -65,3 +65,20 @@ exports.deleteSubscriptionRequest = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.getSubscriptionRequestsByMagasinId = async (req, res) => {
+  try {
+    const { magasinId } = req.params;
+    const subscriptionRequests = await SubscriptionRequest.find({
+      magasin: magasinId,
+    }).populate("magasin", "magasinName");
+    if (!subscriptionRequests) {
+      return res
+        .status(404)
+        .json({ message: "Subscription requests not found for this magasin." });
+    }
+    return res.status(200).json(subscriptionRequests);
+  } catch (error) {
+    console.error("Error retrieving subscription requests:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
