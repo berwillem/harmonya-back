@@ -142,3 +142,12 @@ exports.updateMagasinTour = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+exports.countMagasins = async (req, res) => {
+  try {
+    const magasinCount = await Magasin.countDocuments();
+    res.json({ count: magasinCount });
+  } catch (err) {
+    console.error("Error counting magasins:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

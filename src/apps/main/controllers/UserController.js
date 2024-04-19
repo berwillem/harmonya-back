@@ -43,3 +43,13 @@ exports.deleteUser = async (req, res) => {
     return new Error(error);
   }
 };
+
+exports.countUsers = async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    res.json({ count: userCount });
+  } catch (err) {
+    console.error("Error counting users:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
