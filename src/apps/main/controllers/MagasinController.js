@@ -5,7 +5,7 @@ const { filterObject } = require("../../../helpers/utilities");
 exports.getAllMagasins = async (req, res) => {
   try {
     const page = req.query.page || 1;
-    const pageSize = req.query.pageSize || 10;
+    const pageSize = req.query.pageSize || 12;
     const totalCount = await Magasin.countDocuments();
     const totalPages = Math.ceil(totalCount / pageSize);
     const magasins = await Magasin.find({})

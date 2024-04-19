@@ -4,6 +4,7 @@ const Magasin = require("../models/Magasin");
 // Create a new service
 exports.createService = async (req, res) => {
   try {
+  
     const { Name, prix, time, details, magasin } = req.body;
     const imageURLs = req.imageURLs;
     const newService = new Service({
@@ -33,8 +34,15 @@ exports.createService = async (req, res) => {
 // Get all services
 exports.getAllServices = async (req, res) => {
   try {
-    const services = await Service.find();
-    res.status(200).json(services);
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 12;
+    const totalCount = await Service.countDocuments();
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const services = await Service.find({})
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
+    .sort({ score: -1 });
+    res.status(200).json({services,totalPages});
   } catch (error) {
     res
       .status(500)
