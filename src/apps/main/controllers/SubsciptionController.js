@@ -1,4 +1,5 @@
 const Subscription = require("../models/Subscription");
+const SubscriptionRequest = require("../models/SubscriptionRequest");
 const Magasin = require("../models/Magasin");
 
 exports.createTrialSubscription = async (req, res) => {
@@ -49,7 +50,7 @@ exports.createTrialSubscription = async (req, res) => {
 };
 exports.startSubscription = async (req, res) => {
   try {
-    const { magasinId, type, startDate, endDate, paid } = req.body.data;
+    const { magasinId, type, startDate, endDate, paid, subreq } = req.body;
     if (!magasinId || !type || !startDate || !endDate) {
       return res.status(400).json({
         message: "Magasin ID, type, start date, and end date are required.",
@@ -70,6 +71,9 @@ exports.startSubscription = async (req, res) => {
       paid,
     });
     await subscription.save();
+    if (subreq) {
+      await SubscriptionRequest.findByIdAndDelete(subreq);
+    }
     return res
       .status(201)
       .json({ message: "Subscription started successfully." });
@@ -116,6 +120,21 @@ exports.updateSubscription = async (req, res) => {
       .json({ message: "Subscription updated successfully." });
   } catch (error) {
     console.error("Error updating subscription:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+exports.getSubscriptionsByMagasinId = async (req, res) => {
+  try {
+    const { magasinId } = req.params;
+    const subscriptions = await Subscription.find({ magasin: magasinId });
+    if (!subscriptions) {
+      return res
+        .status(404)
+        .json({ message: "Subscriptions not found for this magasin." });
+    }
+    return res.status(200).json(subscriptions);
+  } catch (error) {
+    console.error("Error retrieving subscriptions:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 };

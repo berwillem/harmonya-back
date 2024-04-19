@@ -5,9 +5,8 @@ const emailSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  expiryDate: {
+  createdAt: {
     type: Date,
-    expires: 30*24*60*60,
     default: Date.now,
   },
 });

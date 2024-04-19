@@ -58,21 +58,44 @@ exports.getMagasinInfos = async (req, res) => {
   try {
     const magasin = await Magasin.findOne({ _id: magasinId });
     if (magasin) {
+      const today = new Date();
+      const dayOfYear =
+        (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
+          Date.UTC(today.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
+      const todayYear = today.getFullYear()
       if (userId) {
-        if (!magasin.visits.userList.includes(userId)) {
-          magasin.visits.userList.push(userId);
-          magasin.visits.auth++;
+        if (!magasin.data.visits.userList.find(user=> user.user == userId)) {
+          magasin.data.visits.userList.push({user:userId, lastVisit: today, visits:2});
+        }else {
+          let user = magasin.data.visits.userList.find(user => user.user == userId);
+          if(user.visits !== 0){
+            user.visits = user.visits-1
+          }else{
+            if(today-user.lastVisit > 8*60*60*1000){
+              user.visits = 2
+              user.lastVisit = today
+            }
+            await magasin.save();
+            return res.status(201).json(magasin.infos);
+          }
+
         }
-        magasin.markModified("visits.userList");
-      } else {
-        magasin.visits.noAuth++;
+        const foundYear = magasin.data.visits.auth.find(item => item.year === todayYear);
+        foundYear.days[dayOfYear] += 1;
+        // magasin.data.visits.auth++;
+        console.log(magasin.data.visits)
+        
+        magasin.markModified("data.visits");
       }
+      const foundYear = magasin.data.visits.noAuth.find(item => item.year === todayYear);
+      foundYear.days[dayOfYear] += 1;
       await magasin.save();
     } else {
       return res.status(404).json({ message: "Magasin Not Found" });
     }
     return res.status(201).json(magasin.infos);
   } catch (error) {
+    // console.log(error)
     return res.status(400).json({ message: "mouchkil" });
   }
 };
@@ -140,5 +163,14 @@ exports.updateMagasinTour = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+exports.countMagasins = async (req, res) => {
+  try {
+    const magasinCount = await Magasin.countDocuments();
+    res.json({ count: magasinCount });
+  } catch (err) {
+    console.error("Error counting magasins:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

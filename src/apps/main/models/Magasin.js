@@ -56,12 +56,54 @@ const magasinSchema = new mongoose.Schema({
   },
   data: {
     visits: {
-      timestamps: [
+      auth: [
         {
-          visitorId: String,
-          timestamp: Date,
+          year: {
+            type: Number,
+            default: new Date().getFullYear,
+          },
+          days: {
+            type: Array,
+            default: () => {
+              if (new Date().getFullYear() % 4 === 0) {
+                return Array(366).fill(0);
+              } else {
+                return Array(365).fill(0);
+              }
+            },
+          },
         },
       ],
+      noAuth: [
+        {
+          year: {
+            type: Number,
+            default: new Date().getFullYear,
+          },
+          days: {
+            type: Array,
+            default: () => {
+              if (new Date().getFullYear() % 4 === 0) {
+                return Array(366).fill(0);
+              } else {
+                return Array(365).fill(0);
+              }
+            },
+          },
+        },
+      ],
+      userList: [{
+        user:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        lastVisit:{
+          type:Date
+        },
+        visits: {
+          type:Number
+        }
+      }],
     },
     bookmarks: {
       type: Number,
@@ -94,36 +136,18 @@ const magasinSchema = new mongoose.Schema({
     },
   },
 
-  visits: {
-    auth: [
-      {
-        year: {
-          type: Number,
-          default: new Date().getFullYear,
-        },
-        days: {
-          type: Array,
-          default: () => {
-            if (new Date().getFullYear() % 4 === 0) {
-              return Array(366).fill(0);
-            } else {
-              return Array(365).fill(0);
-            }
-          },
-        },
-      },
-    ],
-    noAuth: {
-      type: Number,
-      default: 0,
-    },
-    userList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-  },
+  
+});
+
+magasinSchema.pre('save', function (next) {
+  // If there are no entries in the auth array, create one for the current year
+  if (this.data.visits.auth.length === 0) {
+    const currentYear = new Date().getFullYear();
+    const daysArray = new Array(currentYear % 4 === 0 ? 366 : 365).fill(0);
+    this.data.visits.auth.push({ year: currentYear, days: daysArray });
+    this.data.visits.noAuth.push({ year: currentYear, days: daysArray });
+    }
+  next();
 });
 
 const Magasin = mongoose.model("Magasin", magasinSchema);
