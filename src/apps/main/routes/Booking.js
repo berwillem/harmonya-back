@@ -5,6 +5,10 @@ const BookingRequestController = require("../controllers/BookingRequestControlle
 //à bloquer
 
 router.post("/request", BookingRequestController.CreateBookingRequest);
-router.post("/accept", BookingRequestController.acceptBookingRequest)
+router.post("/accept", BookingRequestController.acceptBookingRequest);
+router.delete("/:id", BookingRequestController.deleteBookingRequest);
+router.post("/decline", BookingRequestController.declineBookingRequest)
+
+router.get("/:storeId", BookingRequestController.getBookingRequestsByStore);
 
 module.exports = router
