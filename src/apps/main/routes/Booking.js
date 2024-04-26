@@ -5,5 +5,6 @@ const BookingRequestController = require("../controllers/BookingRequestControlle
 //à bloquer
 
 router.post("/request", BookingRequestController.CreateBookingRequest);
+router.post("/accept", BookingRequestController.acceptBookingRequest)
 
 module.exports = router
