@@ -4,15 +4,21 @@ const {
   validateBoostRequest,
   cancelBoostRequest,
   getAllBoostRequests,
-  getallBoosts,
+  invalidateBoostRequest,
 } = require("../controllers/BoostRequestController");
-const { createBoostFromRequest } = require("../controllers/BoostController");
+const {
+  createBoostFromRequest,
+  getAllBoosts,
+  cancelBoost,
+} = require("../controllers/BoostController");
 const router = express.Router();
 router.get("/boostreq", getAllBoostRequests);
-router.get("/", getallBoosts);
+router.get("/", getAllBoosts);
 router.post("/", createBoostRequest);
 router.post("/validate", validateBoostRequest);
-router.delete("/:requestId", cancelBoostRequest);
+router.post("/invalidate", invalidateBoostRequest);
+router.delete("/boostreq/:requestId", cancelBoostRequest);
 router.post("/activate", createBoostFromRequest);
+router.delete("/:boostId", cancelBoost)
 
 module.exports = router;

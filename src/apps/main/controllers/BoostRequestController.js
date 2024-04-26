@@ -36,6 +36,19 @@ exports.validateBoostRequest = async (req, res) => {
   }
 };
 
+exports.invalidateBoostRequest = async (req, res) => {
+  const { requestId } = req.body;
+  try {
+    await BoostRequest.findByIdAndUpdate(requestId, {
+      $set: { validation: false },
+    });
+    return res.status(201).json({ message: "Request Validated Successfuly" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Internal Server Error");
+  }
+};
+
 exports.cancelBoostRequest = async (req, res) => {
   const { requestId } = req.params;
   try {
@@ -75,8 +88,15 @@ exports.BoostRequestEventListeners = () => {
 
 exports.getAllBoostRequests = async (req, res) => {
   try {
-    const boostreq = await BoostRequest.find();
-    res.send(boostreq);
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 15
+    const totalCount = await BoostRequest.countDocuments();
+    const totalPages = Math.ceil( totalCount / pageSize)
+    const boostRequests = await BoostRequest.find({}).populate("magasin")
+    .skip((page-1) * pageSize)
+    .limit(pageSize)
+    
+    return res.status(200).json({boostRequests, totalPages})
   } catch (err) {
     res.status(400).send(err);
   }

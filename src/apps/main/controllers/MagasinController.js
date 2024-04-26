@@ -26,6 +26,21 @@ exports.getAllMagasins = async (req, res) => {
   }
 };
 
+exports.getMagasinById = async (req, res) => {
+  try{
+
+    const magasin = Magasin.findById(req.params.id).select(
+      "-password -tour -completedAuth"
+      );
+    return res.status(200).json(magasin)
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({
+      message:"Internal Server Error",
+    })
+  }
+};
+
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
   console.log(req.body);
@@ -61,33 +76,46 @@ exports.getMagasinInfos = async (req, res) => {
       const today = new Date();
       const dayOfYear =
         (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
-          Date.UTC(today.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
-      const todayYear = today.getFullYear()
+          Date.UTC(today.getFullYear(), 0, 0)) /
+        24 /
+        60 /
+        60 /
+        1000;
+      const todayYear = today.getFullYear();
       if (userId) {
-        if (!magasin.data.visits.userList.find(user=> user.user == userId)) {
-          magasin.data.visits.userList.push({user:userId, lastVisit: today, visits:2});
-        }else {
-          let user = magasin.data.visits.userList.find(user => user.user == userId);
-          if(user.visits !== 0){
-            user.visits = user.visits-1
-          }else{
-            if(today-user.lastVisit > 8*60*60*1000){
-              user.visits = 2
-              user.lastVisit = today
+        if (!magasin.data.visits.userList.find((user) => user.user == userId)) {
+          magasin.data.visits.userList.push({
+            user: userId,
+            lastVisit: today,
+            visits: 2,
+          });
+        } else {
+          let user = magasin.data.visits.userList.find(
+            (user) => user.user == userId
+          );
+          if (user.visits !== 0) {
+            user.visits = user.visits - 1;
+          } else {
+            if (today - user.lastVisit > 8 * 60 * 60 * 1000) {
+              user.visits = 2;
+              user.lastVisit = today;
             }
             await magasin.save();
             return res.status(201).json(magasin.infos);
           }
-
         }
-        const foundYear = magasin.data.visits.auth.find(item => item.year === todayYear);
+        const foundYear = magasin.data.visits.auth.find(
+          (item) => item.year === todayYear
+        );
         foundYear.days[dayOfYear] += 1;
         // magasin.data.visits.auth++;
-        console.log(magasin.data.visits)
-        
+        console.log(magasin.data.visits);
+
         magasin.markModified("data.visits");
       }
-      const foundYear = magasin.data.visits.noAuth.find(item => item.year === todayYear);
+      const foundYear = magasin.data.visits.noAuth.find(
+        (item) => item.year === todayYear
+      );
       foundYear.days[dayOfYear] += 1;
       await magasin.save();
     } else {
