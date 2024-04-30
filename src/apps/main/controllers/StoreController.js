@@ -46,6 +46,19 @@ exports.createStore = async (req, res) => {
     } else {
       return res.status(404).json({ error: "Magasin not found" });
     }
+    if (magasin) {
+      const wilayaExists = magasin.wilaya.includes(savedStore.wilaya);
+      
+      if (!wilayaExists) {
+        magasin.wilaya.push(savedStore.wilaya);
+        await magasin.save();
+      } else {
+      
+        return res.status(200).json({ message: "Wilaya already exists in magasin" });
+      }
+    } else {
+      return res.status(404).json({ error: "Magasin not found" });
+    }
 
     res.status(201).json(savedStore);
   } catch (error) {
