@@ -175,6 +175,15 @@ exports.countStandardSubscriptions = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.countTrialSubscriptions = async (req, res) => {
+  try {
+    const totalCount = await Subscription.countDocuments({ type: 'trial' });
+    return res.status(200).json({ count: totalCount });
+  } catch (error) {
+    console.error("Error counting trial subscriptions:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
 
 exports.countPremiumSubscriptions = async (req, res) => {
   try {

@@ -30,11 +30,7 @@ const magasinSchema = new mongoose.Schema({
     default: false,
   },
 
-  images: [
-    {
-      type: String,
-    },
-  ],
+ 
   services: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -132,6 +128,11 @@ const magasinSchema = new mongoose.Schema({
     email: String,
     number: String,
     description: String,
+    images: [
+      {
+        type: String,
+      },
+    ],
   },
 
   score: {
