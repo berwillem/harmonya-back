@@ -6,8 +6,13 @@ const storeSchema = new mongoose.Schema({
     enum: ["Alger", "Oran", "Blida", "Béjaïa", "Béjaïa"],
     required: true,
   },
+  storeName: {
+    type: String,
+    required: true,
+  },
   location: {
     type: String,
+    required: true,
   },
   employees: [{ type: mongoose.Schema.Types.ObjectId, ref: "Employee" }],
   owner: {
@@ -17,14 +22,14 @@ const storeSchema = new mongoose.Schema({
   },
   baseAgenda: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:"Agenda",
-    required:true,
+    ref: "Agenda",
+    required: true,
   },
   displayAgenda: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:"Agenda",
-    required:false,
-  }
+    ref: "Agenda",
+    required: false,
+  },
 });
 
 const Store = mongoose.model("Store", storeSchema);
