@@ -66,6 +66,36 @@ const createBoostFromRequestFunction = async (requestId) => {
   }
 };
 
+exports.getAllBoosts = async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 15
+    const totalCount = await Boost.countDocuments();
+    const totalPages = Math.ceil( totalCount / pageSize)
+    const boosts = await Boost.find({}).populate("magasin")
+    .skip((page-1) * pageSize)
+    .limit(pageSize)
+    
+    return res.status(200).json({boosts, totalPages})
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
+exports.cancelBoost = async (req, res) => {
+  const { boostId } = req.params;
+  try {
+    const deletedBoost = await Boost.findByIdAndDelete(boostId);
+    if (!deletedBoost) {
+      return res.status(404).json({ message: "Boost Not found." });
+    }
+    return res.status(201).json({ message: "Boost removed Successfuly." });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Internal Server Error.");
+  }
+};
+
 // Boost event listener, ki y'inseri boost jdid yzidlou f score
 // ki yetna77a boost, yekhlas wella yetsupprima je ne sais kifeh, yna77i score li nzad
 // ou y'activi automatiquement le prochain boost li raw yestenna fih

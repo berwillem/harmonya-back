@@ -29,6 +29,12 @@ const magasinSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  images: [
+    {
+      type: String,
+    },
+  ],
   services: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -57,10 +63,7 @@ const magasinSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-  },
+
   data: {
     visits: {
       auth: [
@@ -118,6 +121,10 @@ const magasinSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+    bookings: {
+      type:Number,
+      default:0
+    },
   },
   infos: {
     name: String,
@@ -126,13 +133,13 @@ const magasinSchema = new mongoose.Schema({
     number: String,
     description: String,
   },
-  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "BoostRequest" }],
 
   score: {
     type: Number,
     default: 0,
   },
 
+  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "BoostRequest" }],
   activeBoost: {
     boost: {
       type: mongoose.Schema.Types.ObjectId,
