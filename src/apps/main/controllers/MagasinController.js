@@ -26,6 +26,21 @@ exports.getAllMagasins = async (req, res) => {
   }
 };
 
+exports.getMagasinById = async (req, res) => {
+  try{
+
+    const magasin = Magasin.findById(req.params.id).select(
+      "-password -tour -completedAuth"
+      );
+    return res.status(200).json(magasin)
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({
+      message:"Internal Server Error",
+    })
+  }
+};
+
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
   console.log(info);

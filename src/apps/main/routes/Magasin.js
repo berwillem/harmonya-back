@@ -9,6 +9,7 @@ const {
   deleteMagasin,
   updateMagasinTour,
   countMagasins,
+  getMagasinById,
 } = require("../controllers/MagasinController");
 const {
   multipleImageUpload,
@@ -24,5 +25,7 @@ router.get("/stores/:id", getMagasinStores);
 router.delete("/:magasinid", deleteMagasin);
 router.put("/tour/:magasinid", updateMagasinTour);
 router.get("/count", countMagasins);
+
+router.get("/:id", getMagasinById)
 
 module.exports = router;

@@ -114,6 +114,10 @@ const magasinSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+    bookings: {
+      type:Number,
+      default:0
+    },
   },
   infos: {
     name: String,

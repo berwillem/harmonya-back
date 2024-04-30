@@ -9,6 +9,7 @@ const {
   agendaToggle,
   refreshAgenda,
 } = require("./AgendaController");
+const Magasin = require("../models/Magasin");
 
 exports.CreateBookingRequest = async (req, res) => {
   const { employee, date, client, store, service } = req.body;
@@ -41,9 +42,9 @@ exports.CreateBookingRequest = async (req, res) => {
       employeeObj.agenda,
       await dateToAgenda(employeeObj.agenda, new Date(date))
     );
-    
+
     await refreshAgenda(store);
-    
+
     const newRequest = new BookingRequest(req.body);
     const savedRequest = await newRequest.save();
     return res.status(201).json(savedRequest);
@@ -103,6 +104,11 @@ exports.acceptBookingRequest = async (req, res) => {
         confirmed: true,
       },
     });
+    const storeObj = await Store.findById(bookingRequest.store).select("owner");
+    await Magasin.findByIdAndUpdate(storeObj.owner, {
+      $inc: { "data.bookings": 1 },
+    });
+
     return res.status(200).json({ message: "Booking Request accepted" });
   } catch (error) {
     console.error(error);
