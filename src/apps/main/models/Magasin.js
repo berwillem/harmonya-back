@@ -30,15 +30,18 @@ const magasinSchema = new mongoose.Schema({
     default: false,
   },
 
-  images: [
-    {
-      type: String,
-    },
-  ],
+ 
   services: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Service",
+    },
+  ],
+  wilaya: [
+    {
+      type: String,
+      enum: ["Alger", "Oran", "Blida", "Béjaïa", "Béjaïa"],
+     
     },
   ],
   stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Store" }],
@@ -125,6 +128,11 @@ const magasinSchema = new mongoose.Schema({
     email: String,
     number: String,
     description: String,
+    images: [
+      {
+        type: String,
+      },
+    ],
   },
 
   score: {

@@ -175,6 +175,15 @@ exports.countStandardSubscriptions = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.countTrialSubscriptions = async (req, res) => {
+  try {
+    const totalCount = await Subscription.countDocuments({ type: 'trial' });
+    return res.status(200).json({ count: totalCount });
+  } catch (error) {
+    console.error("Error counting trial subscriptions:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
 
 exports.countPremiumSubscriptions = async (req, res) => {
   try {
@@ -194,6 +203,23 @@ exports.countGoldSubscriptions = async (req, res) => {
   } catch (error) {
     console.error("Error counting subscriptions:", error);
     return res.status(500).json({ message: "Internal server error." });
+  }
+};
+exports.deleteSubscriptions = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const sub = await Subscription.findByIdAndDelete(id);
+
+    if (!sub) {
+      return res.status(404).json({ message: "Subscriptions not found" });
+    }
+
+    return res.json({
+      message: "Subscriptions deleted successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to delete Subscriptions" });
   }
 };
 

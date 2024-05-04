@@ -9,6 +9,8 @@ const {
   countPremiumSubscriptions,
   countGoldSubscriptions,
   countSubscriptions,
+  countTrialSubscriptions,
+  deleteSubscriptions,
   
 } = require("../controllers/SubsciptionController");
 router.post("/trial", createTrialSubscription);
@@ -17,7 +19,9 @@ router.get("/count", countSubscriptions);
 router.get("/countStandard", countStandardSubscriptions);
 router.get("/countPremium", countPremiumSubscriptions);
 router.get("/countGold", countGoldSubscriptions);
+router.get("/countTrial", countTrialSubscriptions);
 router.get("/", getAllSubscriptions);
+router.delete("/:id",deleteSubscriptions );
 router.get("/:magasinId", getSubscriptionsByMagasinId);
 
 

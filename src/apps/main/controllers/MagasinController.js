@@ -45,10 +45,11 @@ exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
   console.log(info);
   const imageURLs = req.imageURLs;
+  const infos = { info, imageURLs };
   try {
     await Magasin.findByIdAndUpdate(
       id,
-      { infos: info, completedauth: true, images: imageURLs },
+      { infos: infos, completedauth: true },
       { new: true, runValidators: true }
     );
 
