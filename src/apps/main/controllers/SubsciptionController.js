@@ -205,4 +205,21 @@ exports.countGoldSubscriptions = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.deleteSubscriptions = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const sub = await Subscription.findByIdAndDelete(id);
+
+    if (!sub) {
+      return res.status(404).json({ message: "Subscriptions not found" });
+    }
+
+    return res.json({
+      message: "Subscriptions deleted successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to delete Subscriptions" });
+  }
+};
 
