@@ -7,6 +7,7 @@ const StoreController = require("../controllers/StoreController"); // Replace wi
 // CREATE - Create a new store
 router.post("/", StoreController.createStore);
 
+router.post("/closehour", StoreController.closeHour)
 // READ - Get all stores
 router.get("/", StoreController.getAllStores);
 

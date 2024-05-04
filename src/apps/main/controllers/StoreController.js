@@ -7,35 +7,41 @@ const {
   combineAgenda,
   createAgenda,
   updateAgenda,
+  agendaSet,
+  dateToAgenda,
 } = require("./AgendaController");
 
 // CREATE - Create a new store
 exports.createStore = async (req, res) => {
   try {
     const ownerId = req.body.owner;
-    const {agenda, wilaya, location,owner} = req.body
-    const baseAgenda = await createAgenda(agenda)
-    console.log(baseAgenda)
-    const displayAgenda = await createAgenda(agenda)
+    const { agenda, wilaya, location, owner } = req.body;
+    const baseAgenda = await createAgenda(agenda);
+    console.log(baseAgenda);
+    const displayAgenda = await createAgenda(agenda);
 
     if (!ownerId) {
       return res.status(400).json({ error: "Owner ID is required" });
     }
 
-    
-
     // Create a new store with employee references
-    const newStoreData = { wilaya, location, owner, employees:[] , baseAgenda:baseAgenda._id, displayAgenda:displayAgenda._id};
+    const newStoreData = {
+      wilaya,
+      location,
+      owner,
+      employees: [],
+      baseAgenda: baseAgenda._id,
+      displayAgenda: displayAgenda._id,
+    };
     const newStore = new Store(newStoreData);
     const savedStore = await newStore.save();
 
     if (req.body.employees && req.body.employees.length > 0) {
       for (const employeeData of req.body.employees) {
         let employeeId;
-        
+
         // Create a new employee
-        await createEmployeeLocal({ ...employeeData, store:savedStore._id});
-        
+        await createEmployeeLocal({ ...employeeData, store: savedStore._id });
       }
     }
     // Add the store ID to the owner's stores array
@@ -125,32 +131,74 @@ exports.deleteStoreById = async (req, res) => {
 
 exports.getStoreAgenda = async (req, res) => {
   try {
-    const {id} = req.params
-    const storeObj = await Store.findById(id).populate("displayAgenda")
-    if(!storeObj){
-      return res.status(400).json({messaage:"Store Not Found"})
+    const { id } = req.params;
+    const storeObj = await Store.findById(id).populate("displayAgenda");
+    if (!storeObj) {
+      return res.status(400).json({ messaage: "Store Not Found" });
     }
-    return res.status(200).json({agenda:storeObj.displayAgenda})
+    return res.status(200).json({ agenda: storeObj.displayAgenda });
   } catch (error) {
-    return res.status(500).json({error: error.message})
+    return res.status(500).json({ error: error.message });
   }
-}
+};
+
+exports.closeHour = async (req, res) => {
+  const { employee, date, store } = req.body;
+
+  try {
+    if (employee === "employee") {
+      const storeObj = await Store.findById(store).populate("employees");
+      storeObj.employees.map(async (emp, index) => {
+        
+        const employeeAgenda = (await Employee.findById(emp).select("agenda"))
+          .agenda;
+        await agendaSet(
+          employeeAgenda,
+          await dateToAgenda(employeeAgenda, new Date(date)),
+          0
+        );
+        console.log(emp._id)
+      });
+      await agendaSet(
+        storeObj.displayAgenda,
+        await dateToAgenda(storeObj.displayAgenda, new Date(date)),
+        0
+      );
+      return res.status(200).json({messaage: "machya"});
+    } else {
+      const employeeAgenda = (
+        await Employee.findById(employee).select("agenda")
+      ).agenda;
+      await agendaSet(
+        employeeAgenda,
+        await dateToAgenda(employeeAgenda, new Date(date)),
+        0
+      );
+      console.log(employeeAgenda);
+      return res.status(200).json(employeeAgenda);
+    }
+  } catch (err) {
+    
+    console.error(err);
+    return res.status(500)
+  }
+};
 
 exports.getStoreEmployees = async (req, res) => {
   try {
-    const {id} = req.params
+    const { id } = req.params;
     const storeObj = await Store.findById(id).populate({
-      path:"employees",
-      select:"-__v",
-      populate:{
-        path:"agenda"
-      }
-    })
-    if(!storeObj){
-      return res.status(400).json({message:"Store Not Found"})
+      path: "employees",
+      select: "-__v",
+      populate: {
+        path: "agenda",
+      },
+    });
+    if (!storeObj) {
+      return res.status(400).json({ message: "Store Not Found" });
     }
-    return res.status(200).json(storeObj.employees)
-  }catch(err){
-    return res.status(500).json({error: error.message})
+    return res.status(200).json(storeObj.employees);
+  } catch (err) {
+    return res.status(500).json({ error: error.message });
   }
-}
+};
