@@ -29,10 +29,19 @@ const magasinSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+ 
   services: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Service",
+    },
+  ],
+  wilaya: [
+    {
+      type: String,
+      enum: ["Alger", "Oran", "Blida", "Béjaïa", "Béjaïa"],
+     
     },
   ],
   stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Store" }],
@@ -50,10 +59,7 @@ const magasinSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-  },
+
   data: {
     visits: {
       auth: [
@@ -92,18 +98,20 @@ const magasinSchema = new mongoose.Schema({
           },
         },
       ],
-      userList: [{
-        user:{
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
+      userList: [
+        {
+          user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+          lastVisit: {
+            type: Date,
+          },
+          visits: {
+            type: Number,
+          },
         },
-        lastVisit:{
-          type:Date
-        },
-        visits: {
-          type:Number
-        }
-      }],
+      ],
     },
     bookmarks: {
       type: Number,
@@ -120,14 +128,19 @@ const magasinSchema = new mongoose.Schema({
     email: String,
     number: String,
     description: String,
+    images: [
+      {
+        type: String,
+      },
+    ],
   },
-  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "BoostRequest" }],
 
   score: {
     type: Number,
     default: 0,
   },
 
+  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: "BoostRequest" }],
   activeBoost: {
     boost: {
       type: mongoose.Schema.Types.ObjectId,
@@ -139,18 +152,16 @@ const magasinSchema = new mongoose.Schema({
       enum: ["mega", "standard", null],
     },
   },
-
-  
 });
 
-magasinSchema.pre('save', function (next) {
+magasinSchema.pre("save", function (next) {
   // If there are no entries in the auth array, create one for the current year
   if (this.data.visits.auth.length === 0) {
     const currentYear = new Date().getFullYear();
     const daysArray = new Array(currentYear % 4 === 0 ? 366 : 365).fill(0);
     this.data.visits.auth.push({ year: currentYear, days: daysArray });
     this.data.visits.noAuth.push({ year: currentYear, days: daysArray });
-    }
+  }
   next();
 });
 

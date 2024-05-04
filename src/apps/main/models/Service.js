@@ -21,6 +21,10 @@ const serviceSchema = new mongoose.Schema({
   time: {
     type: Number,
   },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+  },
   stores: [
     {
       type: mongoose.Schema.Types.ObjectId,

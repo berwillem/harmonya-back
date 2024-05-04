@@ -14,6 +14,7 @@ exports.getAllMagasins = async (req, res) => {
       .sort({ score: -1 });
     const formattedMagasins = magasins.map((magasin) => ({
       name: magasin.magasinName,
+      images: images[0],
       id: magasin._id,
     }));
 
@@ -27,27 +28,28 @@ exports.getAllMagasins = async (req, res) => {
 };
 
 exports.getMagasinById = async (req, res) => {
-  try{
-
+  try {
     const magasin = Magasin.findById(req.params.id).select(
       "-password -tour -completedAuth"
-      );
-    return res.status(200).json(magasin)
-  }catch(err){
-    console.error(err)
+    );
+    return res.status(200).json(magasin);
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({
-      message:"Internal Server Error",
-    })
+      message: "Internal Server Error",
+    });
   }
 };
 
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
-  console.log(req.body);
+  console.log(info);
+  const imageURLs = req.imageURLs;
+  const infos = { info, imageURLs };
   try {
     await Magasin.findByIdAndUpdate(
       id,
-      { infos: info },
+      { infos: infos, completedauth: true },
       { new: true, runValidators: true }
     );
 

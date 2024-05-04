@@ -15,7 +15,7 @@ const {
 exports.createStore = async (req, res) => {
   try {
     const ownerId = req.body.owner;
-    const { agenda, wilaya, location, owner } = req.body;
+    const { agenda, wilaya, location, storeName, owner } = req.body;
     const baseAgenda = await createAgenda(agenda);
     console.log(baseAgenda);
     const displayAgenda = await createAgenda(agenda);
@@ -27,6 +27,7 @@ exports.createStore = async (req, res) => {
     // Create a new store with employee references
     const newStoreData = {
       wilaya,
+      storeName,
       location,
       owner,
       employees: [],
@@ -49,6 +50,19 @@ exports.createStore = async (req, res) => {
     if (magasin) {
       magasin.stores.push(savedStore._id);
       await magasin.save();
+    } else {
+      return res.status(404).json({ error: "Magasin not found" });
+    }
+    if (magasin) {
+      const wilayaExists = magasin.wilaya.includes(savedStore.wilaya);
+      
+      if (!wilayaExists) {
+        magasin.wilaya.push(savedStore.wilaya);
+        await magasin.save();
+      } else {
+      
+        return res.status(200).json({ message: "Wilaya already exists in magasin" });
+      }
     } else {
       return res.status(404).json({ error: "Magasin not found" });
     }
@@ -183,6 +197,7 @@ exports.closeHour = async (req, res) => {
     return res.status(500)
   }
 };
+
 
 exports.getStoreEmployees = async (req, res) => {
   try {
