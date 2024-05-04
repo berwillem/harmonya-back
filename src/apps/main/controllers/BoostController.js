@@ -6,31 +6,36 @@ exports.createBoostFromRequest = async (req, res) => {
   const { requestId } = req.body;
   let request;
   try {
-    request = await BoostRequest.findById(requestId);
-  } catch (error) {
-    console.log(error);
-  }
-  if (request) {
-    if (request.validation) {
-      const boost = new Boost({
-        boostType: request.boostType,
-        magasin: request.magasin,
-      });
-      try {
-        await boost.save();
-        await request.deleteOne();
-        //autres traitements
-        return res.status(201).json({ message: "Boost created successfully." });
-      } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Failed to create boost." });
+    request = await BoostRequest.findById(requestId).populate("magasin");
+    if (request) {
+      if (request.validation) {
+        if(request.magasin.activeBoost.boost){
+          await exports.cancelBoostFunction(request.magasin.activeBoost.boost)
+        }
+        const boost = new Boost({
+          boostType: request.boostType,
+          magasin: request.magasin,
+        });
+        try {
+          await boost.save();
+          await request.deleteOne();
+          //autres traitements
+          return res
+            .status(201)
+            .json({ message: "Boost created successfully." });
+        } catch (error) {
+          console.log(error);
+          return res.status(500).json({ message: "Failed to create boost." });
+        }
+      } else {
+        console.log(request);
+        return res.status(403).json({ message: "Request is not validated." });
       }
     } else {
-      console.log(request);
-      return res.status(403).json({ message: "Request is not validated." });
+      return res.status(404).json({ message: "Request not found." });
     }
-  } else {
-    return res.status(404).json({ message: "Request not found." });
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -69,14 +74,15 @@ const createBoostFromRequestFunction = async (requestId) => {
 exports.getAllBoosts = async (req, res) => {
   try {
     const page = req.query.page || 1;
-    const pageSize = req.query.pageSize || 15
+    const pageSize = req.query.pageSize || 15;
     const totalCount = await Boost.countDocuments();
-    const totalPages = Math.ceil( totalCount / pageSize)
-    const boosts = await Boost.find({}).populate("magasin")
-    .skip((page-1) * pageSize)
-    .limit(pageSize)
-    
-    return res.status(200).json({boosts, totalPages})
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const boosts = await Boost.find({})
+      .populate("magasin")
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    return res.status(200).json({ boosts, totalPages });
   } catch (err) {
     res.status(400).send(err);
   }
@@ -93,6 +99,20 @@ exports.cancelBoost = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json("Internal Server Error.");
+  }
+};
+
+exports.cancelBoostFunction = async (boostId) => {
+  
+  try {
+    const deletedBoost = await Boost.findByIdAndDelete(boostId);
+    if (!deletedBoost) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false
   }
 };
 

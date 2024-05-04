@@ -23,17 +23,21 @@ exports.updateExpiredSubscriptions = cron.schedule("0 0 * * *", async () => {
 exports.updateAgendas = cron.schedule("0 23 * * *", async () => {
   try {
     const agendas = await Agenda.find({}).select("agenda startDate")
-    const bulkOps = agendas.map(agenda => ({
+    const bulkOps = agendas.map(agenda => {
+      const agendaArr = agenda.agenda
+      agendaArr.push(agendaArr.shift());
+      return {
       updateOne: {
         filter: { _id: agenda._id },
         update: {
           $set: {
-            startDate: new Date(agenda.startDate.setHours(24, 0, 0, 0)),
-            agenda: agenda.agenda.slice(1)
+            startDate: (new Date(agenda.startDate)).setHours(24, 0, 0, 0),
+            agenda: agendaArr
           }
         }
       }
-    }));
+    }
+  });
     await Agenda.bulkWrite(bulkOps);
   } catch(error) {
     console.error("Error updating agendas")
