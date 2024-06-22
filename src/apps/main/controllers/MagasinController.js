@@ -43,19 +43,26 @@ exports.getMagasinById = async (req, res) => {
 
 exports.setMagasinInfo = async (req, res) => {
   const { id, info } = req.body;
-  console.log(info);
+  const imageURL = req.imageURL;
   const imageURLs = req.imageURLs;
-  const infos = { info, imageURLs };
   try {
+    const infos = {
+      ...info,
+      pdp: imageURL,
+      images: imageURLs.map((url) => ({ type: url })),
+    };
+
     await Magasin.findByIdAndUpdate(
       id,
-      { infos: infos, completedauth: true },
+      { infos, completedauth: true },
       { new: true, runValidators: true }
     );
-
     return res.status(201).json({ message: "Update Successful" });
   } catch (err) {
     console.log(err);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while updating the information." });
   }
 };
 
