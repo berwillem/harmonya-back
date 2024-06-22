@@ -30,7 +30,6 @@ const magasinSchema = new mongoose.Schema({
     default: false,
   },
 
- 
   services: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -41,7 +40,6 @@ const magasinSchema = new mongoose.Schema({
     {
       type: String,
       enum: ["Alger", "Oran", "Blida", "Béjaïa", "Béjaïa"],
-     
     },
   ],
   stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Store" }],
@@ -118,8 +116,8 @@ const magasinSchema = new mongoose.Schema({
       default: 0,
     },
     bookings: {
-      type:Number,
-      default:0
+      type: Number,
+      default: 0,
     },
   },
   infos: {
@@ -128,6 +126,7 @@ const magasinSchema = new mongoose.Schema({
     email: String,
     number: String,
     description: String,
+    pdp: String,
     images: [
       {
         type: String,
