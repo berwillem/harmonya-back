@@ -241,6 +241,22 @@ exports.agendaToggle = async (agendaId, agendaTime) => {
   }
 };
 
+exports.agendaSet = async (agendaId, agendaTime, val) => {
+  try {
+    const agenda = await Agenda.findById(agendaId);
+    const { day, index } = agendaTime;
+    // console.log("agendaTime:", agendaTime);
+    // console.log("agenda:", agenda.agenda[day]);
+    agenda.agenda[day][1][index] = val //agenda.agenda[day][1][index] == 1 ? 0 : 1;
+    agenda.markModified("agenda");
+    // console.log("agenda:", agenda.agenda[day]);
+    await agenda.save();
+    return true;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 exports.testFeature = async (req, res) => {
   try {
     const agendas = await Agenda.find({}).select("agenda startDate")

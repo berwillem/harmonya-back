@@ -7,6 +7,8 @@ const {
   combineAgenda,
   createAgenda,
   updateAgenda,
+  agendaSet,
+  dateToAgenda,
 } = require("./AgendaController");
 
 // CREATE - Create a new store
@@ -153,6 +155,49 @@ exports.getStoreAgenda = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+exports.closeHour = async (req, res) => {
+  const { employee, date, store } = req.body;
+
+  try {
+    if (employee === "employee") {
+      const storeObj = await Store.findById(store).populate("employees");
+      storeObj.employees.map(async (emp, index) => {
+        
+        const employeeAgenda = (await Employee.findById(emp).select("agenda"))
+          .agenda;
+        await agendaSet(
+          employeeAgenda,
+          await dateToAgenda(employeeAgenda, new Date(date)),
+          0
+        );
+        console.log(emp._id)
+      });
+      await agendaSet(
+        storeObj.displayAgenda,
+        await dateToAgenda(storeObj.displayAgenda, new Date(date)),
+        0
+      );
+      return res.status(200).json({messaage: "machya"});
+    } else {
+      const employeeAgenda = (
+        await Employee.findById(employee).select("agenda")
+      ).agenda;
+      await agendaSet(
+        employeeAgenda,
+        await dateToAgenda(employeeAgenda, new Date(date)),
+        0
+      );
+      console.log(employeeAgenda);
+      return res.status(200).json(employeeAgenda);
+    }
+  } catch (err) {
+    
+    console.error(err);
+    return res.status(500)
+  }
+};
+
 
 exports.getStoreEmployees = async (req, res) => {
   try {
