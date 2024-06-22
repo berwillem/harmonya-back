@@ -14,7 +14,7 @@ exports.getAllMagasins = async (req, res) => {
       .sort({ score: -1 });
     const formattedMagasins = magasins.map((magasin) => ({
       name: magasin.magasinName,
-      images: images[0],
+      images: magasin.images ? magasin.images : null,
       id: magasin._id,
     }));
 
