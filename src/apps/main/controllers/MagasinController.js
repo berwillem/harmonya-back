@@ -42,18 +42,22 @@ exports.getMagasinById = async (req, res) => {
 };
 
 exports.setMagasinInfo = async (req, res) => {
-  const { id, info } = req.body;
-  const imageURL = req.imageURL;
+  const { info } = req.body;
   const imageURLs = req.imageURLs;
+  const { magasinId } = req.params;
   try {
+    const parsedInfo = JSON.parse(info);
+    const { Adresse, Desc, numero } = parsedInfo;
     const infos = {
-      ...info,
-      pdp: imageURL,
-      images: imageURLs.map((url) => ({ type: url })),
+      Adresse,
+      Desc,
+      numero,
+      pdp: imageURLs[0],
+      images: imageURLs,
     };
 
     await Magasin.findByIdAndUpdate(
-      id,
+      magasinId,
       { infos, completedauth: true },
       { new: true, runValidators: true }
     );

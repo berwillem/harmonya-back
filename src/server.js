@@ -21,6 +21,7 @@ server.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 
 //use json
 server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
 
 // access log
 const logStream = fs.createWriteStream(path.join(__dirname, "access.log"), {
@@ -32,7 +33,7 @@ server.use(morgan("dev", { stream: logStream }));
 
 const routes = require("./router");
 const { handleEventListeners } = require("./helpers/eventHandler");
-const {updateExpiredSubscriptions} = require("./helpers/nodecron");
+const { updateExpiredSubscriptions } = require("./helpers/nodecron");
 server.use(routes);
 // Start the cron job
 updateExpiredSubscriptions.start();

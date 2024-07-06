@@ -13,16 +13,14 @@ const {
 } = require("../controllers/MagasinController");
 const {
   multipleImageUpload,
-  imageUpload,
   imageUploadLimit,
 } = require("../../../middlewares/imageUpload");
 const router = express.Router();
 
 router.get("/", getAllMagasins);
 router.put(
-  "/update",
-  imageUploadLimit,
-  imageUpload,
+  "/update/:magasinId",
+  // imageUploadLimit,
   multipleImageUpload,
   setMagasinInfo
 );

@@ -166,6 +166,9 @@ exports.countSubscriptions = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
+
+// TODO : change the counts to one bigger controller : 
 exports.countStandardSubscriptions = async (req, res) => {
   try {
     const totalCount = await Subscription.countDocuments({ type: 'standard' });

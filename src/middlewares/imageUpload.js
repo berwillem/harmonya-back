@@ -28,6 +28,7 @@ exports.imageUpload = (req, res, next) => {
 exports.multipleImageUpload = (req, res, next) => {
   upload.array("images", req.uploadLimit)(req, res, (err) => {
     if (err instanceof multer.MulterError) {
+      console.log(err);
       return res.status(400).json({ message: "Multer error: " + err.message });
     } else if (err) {
       return res.status(500).json({ message: "Error: " + err.message });
@@ -42,6 +43,7 @@ exports.multipleImageUpload = (req, res, next) => {
     }
 
     const uploadedImages = [];
+
     const uploadPromises = req.files.map((file) => {
       return cloudinary.uploader
         .upload(file.path)
@@ -51,6 +53,7 @@ exports.multipleImageUpload = (req, res, next) => {
           throw new Error("Error uploading image to Cloudinary");
         });
     });
+
     Promise.all(uploadPromises)
       .then(() => {
         req.imageURLs = uploadedImages;
@@ -65,9 +68,8 @@ exports.multipleImageUpload = (req, res, next) => {
 
 exports.imageUploadLimit = async (req, res, next) => {
   try {
-    const magasinId = req.body.magasinId;
+    const { magasinId } = req.params;
     const magasin = await Magasin.findById(magasinId);
-
     if (!magasin) {
       return res.status(404).json({ message: "Magasin not found." });
     }
@@ -82,13 +84,13 @@ exports.imageUploadLimit = async (req, res, next) => {
     let uploadLimit;
     switch (subscription.type) {
       case "trial":
-        uploadLimit = 2;
-        break;
-      case "standard":
         uploadLimit = 3;
         break;
-      case "premium":
+      case "standard":
         uploadLimit = 4;
+        break;
+      case "premium":
+        uploadLimit = 5;
         break;
       case "gold":
         uploadLimit = 6;
@@ -96,9 +98,7 @@ exports.imageUploadLimit = async (req, res, next) => {
       default:
         return res.status(400).json({ message: "Unknown subscription type." });
     }
-
     req.uploadLimit = uploadLimit;
-
     next();
   } catch (error) {
     console.error("Error in imageUploadLimit middleware:", error);

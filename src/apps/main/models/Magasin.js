@@ -121,17 +121,11 @@ const magasinSchema = new mongoose.Schema({
     },
   },
   infos: {
-    name: String,
-    address: String,
-    email: String,
-    number: String,
-    description: String,
+    Adresse: String,
+    numero: String,
+    Desc: String,
     pdp: String,
-    images: [
-      {
-        type: String,
-      },
-    ],
+    images: [String],
   },
 
   score: {
