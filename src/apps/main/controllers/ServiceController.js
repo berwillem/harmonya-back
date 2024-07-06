@@ -5,7 +5,7 @@ const Magasin = require("../models/Magasin");
 exports.createService = async (req, res) => {
   try {
   
-    const { Name, prix, time, details, magasin } = req.body;
+    const { Name, prix, time, details, magasin,category } = req.body;
     const imageURLs = req.imageURLs;
     const newService = new Service({
       Name,
@@ -13,6 +13,7 @@ exports.createService = async (req, res) => {
       time,
       details,
       magasin,
+      category:category,
       images: imageURLs,
     });
 
@@ -106,13 +107,10 @@ exports.deleteServiceById = async (req, res) => {
 exports.getServicesByCategory = async (req, res) => {
   const { id } = req.params;
   try {
-    let serviceIds = [];
-    const magasins = await Magasin.find({ category: id });
-    magasins.map((magasin) => serviceIds.push(...magasin.services));
-    const services = await Service.find({ _id: { $in: serviceIds } });
-    return res.status(201).json(services);
+    const services = await Service.find({ category: id });
+    return res.status(200).json({ services });
   } catch (error) {
-    console.log(error);
-    return res.status(400).json({ message: "mouchkil" });
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred while retrieving services" });
   }
 };

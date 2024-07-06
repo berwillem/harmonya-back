@@ -13,10 +13,10 @@ exports.createAgendaAPI = async (req, res) => {
   }
 };
 
-exports.createAgenda = async ({agenda, unit, startDate}) => {
+exports.createAgenda = async ({ agenda, unit, startDate }) => {
   try {
-    console.log("create agenda parameter:",{agenda, unit, startDate})
-    const agendaObj = new Agenda({agenda, unit, startDate});
+    console.log("create agenda parameter:", { agenda, unit, startDate });
+    const agendaObj = new Agenda({ agenda, unit, startDate });
     const savedAgenda = await agendaObj.save();
     return savedAgenda;
   } catch (err) {
@@ -209,9 +209,55 @@ exports.dateToAgenda = async (agendaId, date) => {
   }
 };
 
+exports.dateToAgendaLocal = (agenda, date) => {
+  try {
+    // console.log(date.getHours())
+    // console.log("date.getMinutes(): ", date.getMinutes())
+    const result = {
+      day: 0,
+      index: 0,
+    };
+
+    result.day = Math.floor(
+      (date.getTime() - agenda.startDate.getTime()) / (1000 * 3600 * 24)
+    );
+    if (result.day < 0 || result.day > 30) {
+      console.error("Date outside agenda");
+      return false;
+    }
+    let day = agenda.agenda[result.day];
+    // console.log("day[0]: ", day[0])
+    let minutes = (date.getHours() - day[0]) * 60 + date.getMinutes();
+    // console.log("minutes: ", minutes)
+    if (minutes < 0) {
+      console.error("Date before starting hours");
+      return false;
+    }
+    result.index = Math.floor(minutes / agenda.unit);
+    return result;
+  } catch (error) {
+    // console.log(date.getTime());
+    console.error(error);
+  }
+};
+
 exports.agendaTimeAvailable = async (agendaId, agendaTime) => {
   try {
     const agenda = await Agenda.findById(agendaId);
+    const { day, index } = agendaTime;
+
+    if (agenda.agenda[day][1][index]) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.agendaTimeAvailableLocal = async (agenda, agendaTime) => {
+  try {
     const { day, index } = agendaTime;
 
     if (agenda.agenda[day][1][index]) {
@@ -247,7 +293,7 @@ exports.agendaSet = async (agendaId, agendaTime, val) => {
     const { day, index } = agendaTime;
     // console.log("agendaTime:", agendaTime);
     // console.log("agenda:", agenda.agenda[day]);
-    agenda.agenda[day][1][index] = val //agenda.agenda[day][1][index] == 1 ? 0 : 1;
+    agenda.agenda[day][1][index] = val; //agenda.agenda[day][1][index] == 1 ? 0 : 1;
     agenda.markModified("agenda");
     // console.log("agenda:", agenda.agenda[day]);
     await agenda.save();
@@ -259,24 +305,23 @@ exports.agendaSet = async (agendaId, agendaTime, val) => {
 
 exports.testFeature = async (req, res) => {
   try {
-    const agendas = await Agenda.find({}).select("agenda startDate")
-    let i = 0
-    const bulkOps = agendas.map(agenda => ({
+    const agendas = await Agenda.find({}).select("agenda startDate");
+    let i = 0;
+    const bulkOps = agendas.map((agenda) => ({
       updateOne: {
         filter: { _id: agenda._id },
         update: {
           $set: {
             startDate: new Date(agenda.startDate.setHours(24, 0, 0, 0)),
-            agenda: agenda.agenda.slice(1)
-          }
-        }
-      }
+            agenda: agenda.agenda.slice(1),
+          },
+        },
+      },
     }));
     await Agenda.bulkWrite(bulkOps);
-    return res.status(200).json({message:"success"})
-  } catch(error) {
-    console.error("Error updating agendas")
-    return res.status(500).json({message:"failed"})
+    return res.status(200).json({ message: "success" });
+  } catch (error) {
+    console.error("Error updating agendas");
+    return res.status(500).json({ message: "failed" });
   }
-
 };
