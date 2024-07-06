@@ -9,8 +9,8 @@ exports.createBoostFromRequest = async (req, res) => {
     request = await BoostRequest.findById(requestId).populate("magasin");
     if (request) {
       if (request.validation) {
-        if(request.magasin.activeBoost.boost){
-          await exports.cancelBoostFunction(request.magasin.activeBoost.boost)
+        if (request.magasin.activeBoost.boost) {
+          await exports.cancelBoostFunction(request.magasin.activeBoost.boost);
         }
         const boost = new Boost({
           boostType: request.boostType,
@@ -103,7 +103,6 @@ exports.cancelBoost = async (req, res) => {
 };
 
 exports.cancelBoostFunction = async (boostId) => {
-  
   try {
     const deletedBoost = await Boost.findByIdAndDelete(boostId);
     if (!deletedBoost) {
@@ -112,7 +111,7 @@ exports.cancelBoostFunction = async (boostId) => {
     return true;
   } catch (error) {
     console.log(error);
-    return false
+    return false;
   }
 };
 
@@ -154,4 +153,20 @@ exports.BoostEventListeners = async () => {
         });
     }
   });
+};
+
+exports.countBoosts = async (req, res) => {
+  try {
+    // Count regular boosts
+    const standardBoosts = await Boost.countDocuments({
+      boostType: "standard",
+    });
+    // Count mega boosts
+    const megaBoosts = await Boost.countDocuments({ boostType: "mega" });
+
+    // Return both counts
+    return res.status(200).json({ standardBoosts, megaBoosts });
+  } catch (err) {
+    res.status(400).send(err);
+  }
 };
