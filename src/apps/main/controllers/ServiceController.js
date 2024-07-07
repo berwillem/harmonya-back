@@ -5,21 +5,22 @@ const Magasin = require("../models/Magasin");
 exports.createService = async (req, res) => {
   try {
   
-    const { Name, prix, time, details, magasin,category } = req.body;
+    const { Name, prix, time, details, category } = req.body;
+    const { magasinId } = req.params;
     const imageURLs = req.imageURLs;
     const newService = new Service({
       Name,
       prix,
       time,
       details,
-      magasin,
-      category:category,
+      magasin: magasinId,
+      category: category,
       images: imageURLs,
     });
 
     const savedService = await newService.save();
 
-    await Magasin.findByIdAndUpdate(magasin, {
+    await Magasin.findByIdAndUpdate(magasinId, {
       $push: { services: savedService._id },
     });
 
@@ -40,10 +41,10 @@ exports.getAllServices = async (req, res) => {
     const totalCount = await Service.countDocuments();
     const totalPages = Math.ceil(totalCount / pageSize);
     const services = await Service.find({})
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .sort({ score: -1 });
-    res.status(200).json({services,totalPages});
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ score: -1 });
+    res.status(200).json({ services, totalPages });
   } catch (error) {
     res
       .status(500)
@@ -111,6 +112,8 @@ exports.getServicesByCategory = async (req, res) => {
     return res.status(200).json({ services });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred while retrieving services" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while retrieving services" });
   }
 };

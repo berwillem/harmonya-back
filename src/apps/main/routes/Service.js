@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const ServiceController = require("../controllers/ServiceController");
-const { multipleImageUpload } = require("../../../middlewares/imageUpload");
+const {
+  multipleImageUpload,
+  imageUploadLimit,
+} = require("../../../middlewares/imageUpload");
 
 // user auth routes :
 router.get("/", ServiceController.getAllServices);
 router.post(
-  "/",
-
+  "/:magasinId",
+  imageUploadLimit,
   multipleImageUpload,
   ServiceController.createService
 );

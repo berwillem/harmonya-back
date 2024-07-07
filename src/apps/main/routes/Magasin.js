@@ -20,7 +20,7 @@ const router = express.Router();
 router.get("/", getAllMagasins);
 router.put(
   "/update/:magasinId",
-  // imageUploadLimit,
+  imageUploadLimit,
   multipleImageUpload,
   setMagasinInfo
 );
