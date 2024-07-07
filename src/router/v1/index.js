@@ -8,6 +8,7 @@ router.use("/auth/magasin", require(MAIN_ROUTES_PATH + "AuthMagasin"));
 router.use("/user", require(MAIN_ROUTES_PATH + "User"));
 router.use("/service", require(MAIN_ROUTES_PATH + "Service"));
 router.use("/newsletter", require(MAIN_ROUTES_PATH + "NewsLetter"));
+router.use("/stat", require(MAIN_ROUTES_PATH + "Stat"));
 router.use("/categories", require(MAIN_ROUTES_PATH + "Category"));
 router.use("/subscription", require(MAIN_ROUTES_PATH + "Subscription"));
 router.use(
