@@ -4,7 +4,7 @@ const multer = require("multer");
 const storage = multer.diskStorage({});
 
 const upload = multer({
-  storage: storage,
+  // storage: storage,
   fileFilter: (req, file, cb) => {
     // Check if the file type is allowed (e.g., image)
     if (!file.mimetype.startsWith("image/")) {
