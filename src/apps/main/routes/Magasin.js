@@ -1,5 +1,6 @@
 const express = require("express");
 
+// /magasin
 const {
   getAllMagasins,
   setMagasinInfo,
@@ -14,6 +15,7 @@ const {
 const {
   multipleImageUpload,
   imageUploadLimit,
+  dynamicImageUpload,
 } = require("../../../middlewares/imageUpload");
 const router = express.Router();
 
@@ -21,11 +23,14 @@ router.get("/", getAllMagasins);
 router.put(
   "/update/:magasinId",
   // imageUploadLimit,
-  multipleImageUpload,
+  dynamicImageUpload,
   setMagasinInfo
 );
+
+
 router.get("/services", getMagasinServices);
 router.get("/infos", getMagasinInfos);
+// router.put("/infos/:magasinId", update)
 router.get("/stores/:id", getMagasinStores);
 router.delete("/:magasinid", deleteMagasin);
 router.put("/tour/:magasinid", updateMagasinTour);

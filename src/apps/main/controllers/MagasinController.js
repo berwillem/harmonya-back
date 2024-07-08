@@ -1,6 +1,6 @@
 const Magasin = require("../models/Magasin");
 const Service = require("../models/Service");
-const { filterObject } = require("../../../helpers/utilities");
+const { filterObject, arrayify } = require("../../../helpers/utilities");
 
 exports.getAllMagasins = async (req, res) => {
   try {
@@ -42,23 +42,25 @@ exports.getMagasinById = async (req, res) => {
 };
 
 exports.setMagasinInfo = async (req, res) => {
-  const { info } = req.body;
-  const imageURLs = req.imageURLs;
+  const { adresse, name, desc, numero } = req.body;
+  const pdp = req.body.pdp ? req.body.pdp : req.pdp[0]   
+  const images = [...arrayify(req.body.images), ...arrayify(req.images)];
+  
+  // const {pdp, images} = req;
+
   const { magasinId } = req.params;
   try {
-    const parsedInfo = JSON.parse(info);
-    const { Adresse, Desc, numero } = parsedInfo;
     const infos = {
-      Adresse,
-      Desc,
+      Adresse: adresse,
+      Desc: desc,
       numero,
-      pdp: imageURLs[0],
-      images: imageURLs,
-    };
+      pdp: pdp||null,
+      images: images,
+    }; 
 
     await Magasin.findByIdAndUpdate(
       magasinId,
-      { infos, completedauth: true },
+      { infos, magasinName: name, completedauth: true },
       { new: true, runValidators: true }
     );
     return res.status(201).json({ message: "Update Successful" });
@@ -85,6 +87,9 @@ exports.getMagasinInfos = async (req, res) => {
   const { magasinId, userId } = req.query;
   try {
     const magasin = await Magasin.findOne({ _id: magasinId });
+    if (userId === magasinId) {
+      return res.status(201).json({...magasin.infos, magasinName: magasin.magasinName});
+    }
     if (magasin) {
       const today = new Date();
       const dayOfYear =
@@ -206,6 +211,30 @@ exports.updateMagasinTour = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+exports.updateMagasinInfos = async (req, res) => {
+  const { magasinid } = req.params;
+  const { adresse, name, desc, numero } = req.body;
+  const { pdp, images } = req
+
+  try {
+    const magasin = await Magasin.findByIdUpdate(magasinid, {
+      "infos.Adresse": adresse,
+      "infos.Desc": desc,
+      "infos.numero": numero,
+      "infos.pdp": pdp,
+      "infos.images": images,
+      magasinName: name
+    }, {
+      new:true
+    });
+    return res.status(200).json({magasin})
+  }catch(err){
+    console.error(err)
+    return res.status(500).json({message:"Internal Server Error"})
+  }
+
+}
 exports.countMagasins = async (req, res) => {
   try {
     const magasinCount = await Magasin.countDocuments();

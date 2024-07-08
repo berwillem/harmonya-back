@@ -5,3 +5,7 @@ exports.filterObject = (obj, attributes) => {
   });
   return result;
 };
+
+exports.arrayify = (_) => {
+  return _ ? Array.isArray(_) ? _ : [_]: [];
+}
