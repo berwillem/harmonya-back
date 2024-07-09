@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Magasin = require("../models/Magasin");
 const Service = require("../models/Service");
 const Store = require("../models/Store");
+const BookingRequest = require("../models/BookingRequest");
 
 exports.getStatMagasin = async (req, res) => {
   try {
@@ -105,12 +106,18 @@ exports.getAllServicesStat = async (req, res) => {
           Name: 1,
           time: 1,
           category: { $arrayElemAt: ['$category.categoryName', 0] }, 
-          numberOfBookingRequests: { $size: '$bookingRequests' },
+          numberOfBookingRequests: { $size: {
+            $filter: {
+              input: '$bookingRequests',
+              as: 'bookingRequest',
+              cond: { $eq: ['$$bookingRequest.confirmed', true] }
+            }
+          } },
           'data.visits': 1 
         }
       }
     ]);
-console.log(services);
+
     res.json(services);
   } catch (error) {
     console.error('Erreur lors de la récupération des statistiques des services:', error);
@@ -150,7 +157,13 @@ console.log(services);
             'infos.Adresse': 1, // Accéder à l'adresse du magasin à travers les infos du magasin
             owner: 1, // Inclure l'ID du propriétaire du magasin
             'infos.numero': 1, // Accéder au numéro de téléphone à travers les infos du magasin
-            numberOfBookingRequests: { $size: '$bookingRequests' } // Calcul du nombre de demandes de réservation
+            numberOfBookingRequests: { $size: {
+              $filter: {
+                input: '$bookingRequests',
+                as: 'bookingRequest',
+                cond: { $eq: ['$$bookingRequest.confirmed', true] }
+              }
+            } } // Calcul du nombre de demandes de réservation
           }
         }
       ]);
@@ -159,5 +172,62 @@ console.log(services);
     } catch (error) {
       console.error('Erreur lors de la récupération des stores:', error);
       res.status(500).json({ message: 'Erreur lors de la récupération des stores' });
+    }
+  };
+  exports.getBookingStat = async (req, res) => {
+    try {
+      const { idMagas } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(idMagas)) {
+        return res.status(400).json({ error: "Invalid ID format" });
+      }
+  
+      const objectId = new mongoose.Types.ObjectId(idMagas);
+
+      // Trouver tous les stores appartenant au magasin donné
+      const stores = await Store.find({ owner: objectId }).select('_id').exec();
+      const storeIds = stores.map(store => store._id);
+
+      const results = await BookingRequest.aggregate([
+        {
+          // Filtre pour les `BookingRequest` confirmés des stores appartenant au magasin donné
+          $match: {
+            store: { $in: storeIds },
+            confirmed: true
+          }
+        },
+        {
+          // Extrait l'année et le mois du champ `date`
+          $project: {
+            year: { $year: "$date" },
+            month: { $month: "$date" }
+          }
+        },
+        {
+          // Groupe par année et mois, et compte le nombre de documents dans chaque groupe
+          $group: {
+            _id: { year: "$year", month: "$month" },
+            count: { $sum: 1 }
+          }
+        },
+        {
+          // Trie les résultats par année puis par mois
+          $sort: { "_id.year": 1, "_id.month": 1 }
+        },
+        {
+          // Optionnel: formate les résultats
+          $project: {
+            _id: 0,
+            year: "$_id.year",
+            month: "$_id.month",
+            count: "$count"
+          }
+        }
+      ]);
+ 
+      res.json(results);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal server error' });
     }
   };
