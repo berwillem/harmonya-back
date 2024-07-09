@@ -8,7 +8,7 @@ exports.createBoostFromRequest = async (req, res) => {
   try {
     request = await BoostRequest.findById(requestId).populate("magasin");
     if (request) {
-      if (request.validation) {
+      if (request.validation && request.ready) {
         if (request.magasin.activeBoost.boost) {
           await exports.cancelBoostFunction(request.magasin.activeBoost.boost);
         }
@@ -29,7 +29,7 @@ exports.createBoostFromRequest = async (req, res) => {
         }
       } else {
         console.log(request);
-        return res.status(403).json({ message: "Request is not validated." });
+        return res.status(403).json({ message: "Request is not validated or ready." });
       }
     } else {
       return res.status(404).json({ message: "Request not found." });
@@ -48,7 +48,7 @@ const createBoostFromRequestFunction = async (requestId) => {
     console.log(error);
   }
   if (request) {
-    if (request.validation) {
+    if (request.validation && request.ready) {
       const boost = new Boost({
         boostType: request.boostType,
         magasin: request.magasin,

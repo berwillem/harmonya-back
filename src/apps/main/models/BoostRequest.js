@@ -18,6 +18,10 @@ const boostRequestSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  ready: {
+    type: Boolean,
+    default: false
+  }
   
 });
 

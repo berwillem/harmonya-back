@@ -63,6 +63,36 @@ exports.cancelBoostRequest = async (req, res) => {
   }
 };
 
+exports.prepareBoostRequest = async (req, res) => {
+  const { requestId } = req.body
+  try {
+    const boostRequest = await BoostRequest.findById(requestId)
+    if (!boostRequest) {
+      return res.status(404).json({ message: "Request Not found." })
+    }
+    boostRequest.ready = true
+    await boostRequest.save()
+    return res.status(200).json(boostRequest)
+  }catch(err){
+    console.log(err)
+    return res.status(500).json("Internal Server Error.")
+  }
+}
+exports.unprepareBoostRequest = async (req, res) => {
+  const { requestId } = req.body
+  try {
+    const boostRequest = await BoostRequest.findById(requestId)
+    if (!boostRequest) {
+      return res.status(404).json({ message: "Request Not found." })
+    }
+    boostRequest.ready = false
+    await boostRequest.save()
+    return res.status(200).json(boostRequest)
+  }catch(err){
+    console.log(err)
+    return res.status(500).json("Internal Server Error.")
+  }
+}
 exports.BoostRequestEventListeners = () => {
   const changeStream = BoostRequest.watch();
   changeStream.on("change", (change) => {
