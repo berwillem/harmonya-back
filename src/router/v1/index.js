@@ -23,6 +23,7 @@ router.use("/booking", require(MAIN_ROUTES_PATH + "Booking"));
 router.use("/employee", require(MAIN_ROUTES_PATH + "Employee"));
 router.use("/agenda", require(MAIN_ROUTES_PATH + "Agenda"));
 router.use("/PubManagment", require(ADMIN_ROUTES_PATH + "PubManagment"));
+router.use("/alert", require(ADMIN_ROUTES_PATH + "Alert"));
 router.use(
   "/PubManagmentMobil",
   require(ADMIN_ROUTES_PATH + "PubManagmentMobil")
