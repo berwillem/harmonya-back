@@ -26,6 +26,11 @@ const serviceSchema = new mongoose.Schema({
     ref: "Category",
     required: true,
   },
+  cible: {
+    type: String,
+    enum: ["men", "women", "both"],
+    required: true,
+  },
   stores: [
     {
       type: mongoose.Schema.Types.ObjectId,
