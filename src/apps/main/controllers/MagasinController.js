@@ -4,21 +4,51 @@ const { filterObject, arrayify } = require("../../../helpers/utilities");
 
 exports.getAllMagasins = async (req, res) => {
   try {
-    const page = req.query.page || 1;
-    const pageSize = req.query.pageSize || 12;
-    const totalCount = await Magasin.countDocuments();
-    const totalPages = Math.ceil(totalCount / pageSize);
-    const magasins = await Magasin.find({})
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ score: -1 });
-    const formattedMagasins = magasins.map((magasin) => ({
-      name: magasin.magasinName,
-      images: magasin.images ? magasin.images : null,
-      id: magasin._id,
-    }));
+    const {
+      page = 1,
+      pageSize = 12,
+      wilaya,
+      search,
+    } = req.query;
 
-    return res.status(200).json({ magasins: formattedMagasins, totalPages });
+    const matchStage = {};
+    if (wilaya) {
+      // matchStage["stores.wilaya"] = wilaya;
+      matchStage["wilaya"] = { $in: [wilaya] };
+    }
+
+    if (search) {
+      matchStage.magasinName = { $regex: search, $options: 'i' };
+    }
+
+    const aggregationPipeline = [
+      { $match: matchStage },
+      { $sort: { score: -1 } },
+      { $skip: (page - 1) * pageSize },
+      { $limit: parseInt(pageSize) },
+      {
+        $project: {
+          name: "$magasinName",
+          images: { $ifNull: ["$infos.images", null] },
+          id: "$_id"
+        }
+      }
+    ];
+
+    const totalCountPipeline = [
+      { $match: matchStage },
+      { $count: "totalCount" }
+    ];
+
+    const [magasins, totalCountResult] = await Promise.all([
+      Magasin.aggregate(aggregationPipeline).exec(),
+      Magasin.aggregate(totalCountPipeline).exec()
+    ]);
+
+    const totalCount = totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    res.status(200).json({ magasins, totalPages });
   } catch (error) {
     console.error("Error fetching magasins:", error);
     return res.status(500).json({
@@ -43,9 +73,9 @@ exports.getMagasinById = async (req, res) => {
 
 exports.setMagasinInfo = async (req, res) => {
   const { adresse, name, desc, numero } = req.body;
-  const pdp = req.body.pdp ? req.body.pdp : req.pdp[0]   
+  const pdp = req.body.pdp ? req.body.pdp : req.pdp[0];
   const images = [...arrayify(req.body.images), ...arrayify(req.images)];
-  
+
   // const {pdp, images} = req;
 
   const { magasinId } = req.params;
@@ -54,9 +84,9 @@ exports.setMagasinInfo = async (req, res) => {
       Adresse: adresse,
       Desc: desc,
       numero,
-      pdp: pdp||null,
+      pdp: pdp || null,
       images: images,
-    }; 
+    };
 
     await Magasin.findByIdAndUpdate(
       magasinId,
@@ -88,7 +118,9 @@ exports.getMagasinInfos = async (req, res) => {
   try {
     const magasin = await Magasin.findOne({ _id: magasinId });
     if (userId === magasinId) {
-      return res.status(201).json({...magasin.infos, magasinName: magasin.magasinName});
+      return res
+        .status(201)
+        .json({ ...magasin.infos, magasinName: magasin.magasinName });
     }
     if (magasin) {
       const today = new Date();
@@ -215,26 +247,29 @@ exports.updateMagasinTour = async (req, res) => {
 exports.updateMagasinInfos = async (req, res) => {
   const { magasinid } = req.params;
   const { adresse, name, desc, numero } = req.body;
-  const { pdp, images } = req
+  const { pdp, images } = req;
 
   try {
-    const magasin = await Magasin.findByIdUpdate(magasinid, {
-      "infos.Adresse": adresse,
-      "infos.Desc": desc,
-      "infos.numero": numero,
-      "infos.pdp": pdp,
-      "infos.images": images,
-      magasinName: name
-    }, {
-      new:true
-    });
-    return res.status(200).json({magasin})
-  }catch(err){
-    console.error(err)
-    return res.status(500).json({message:"Internal Server Error"})
+    const magasin = await Magasin.findByIdUpdate(
+      magasinid,
+      {
+        "infos.Adresse": adresse,
+        "infos.Desc": desc,
+        "infos.numero": numero,
+        "infos.pdp": pdp,
+        "infos.images": images,
+        magasinName: name,
+      },
+      {
+        new: true,
+      }
+    );
+    return res.status(200).json({ magasin });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
-
-}
+};
 exports.countMagasins = async (req, res) => {
   try {
     const magasinCount = await Magasin.countDocuments();
