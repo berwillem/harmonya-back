@@ -40,12 +40,12 @@ exports.CreateBookingRequest = async (req, res) => {
         ) {
           employeeObj = emp;
           req.body.employee = emp._id;
-          console.log("employeeObj: ",employeeObj)
+          console.log("employeeObj: ", employeeObj);
           break;
         }
       }
     } else {
-      console.log("called")
+      console.log("called");
       employeeObj = await Employee.findById(employee).populate("agenda");
       if (!employeeObj) {
         return res.status(404).json({ message: "Employee not found" });
@@ -53,10 +53,10 @@ exports.CreateBookingRequest = async (req, res) => {
     }
 
     if (
-      !(agendaTimeAvailableLocal(
+      !agendaTimeAvailableLocal(
         employeeObj.agenda,
         dateToAgendaLocal(employeeObj.agenda, new Date(date))
-      ))
+      )
     ) {
       return res.status(400).json({ message: "Employee unavailable" });
     }
@@ -82,13 +82,23 @@ exports.getBookingRequestsByStore = async (req, res) => {
   try {
     const bookingRequests = await BookingRequest.find({
       store: storeId,
-    }).populate("client store service");
+    }).populate("client employee store service");
     res.json(bookingRequests);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch booking requests" });
   }
 };
-
+exports.getBookingRequestsByUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const bookingRequests = await BookingRequest.find({
+      client: userId,
+    }).populate("client store service employee");
+    res.json(bookingRequests);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch booking requests" });
+  }
+};
 exports.updateBookingRequest = async (req, res) => {
   try {
     const bookingRequest = await BookingRequest.findByIdAndUpdate(
