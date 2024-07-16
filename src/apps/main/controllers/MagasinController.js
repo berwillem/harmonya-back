@@ -151,7 +151,8 @@ exports.getMagasinInfos = async (req, res) => {
               user.lastVisit = today;
             }
             await magasin.save();
-            return res.status(201).json(magasin.infos);
+            return res.status(201).json({...magasin.infos, magasinName: magasin.magasinName});
+
           }
         }
         const foundYear = magasin.data.visits.auth.find(
@@ -171,7 +172,7 @@ exports.getMagasinInfos = async (req, res) => {
     } else {
       return res.status(404).json({ message: "Magasin Not Found" });
     }
-    return res.status(201).json(magasin.infos);
+    return res.status(201).json({...magasin.infos, magasinName: magasin.magasinName});
   } catch (error) {
     // console.log(error)
     return res.status(400).json({ message: "mouchkil" });

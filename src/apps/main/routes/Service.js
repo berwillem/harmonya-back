@@ -14,6 +14,7 @@ router.post(
   multipleImageUpload,
   ServiceController.createService
 );
+router.put("/:serviceId", ServiceController.updateServiceById);
 router.get("/category/:id", ServiceController.getServicesByCategory);
 router.get("/id/:id", ServiceController.getServiceById);
 router.delete("/id/:id", ServiceController.deleteServiceById);
