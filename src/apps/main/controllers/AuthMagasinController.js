@@ -71,7 +71,10 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   let existingUser;
   try {
-    existingUser = await Magasin.findOne({ email: email });
+     existingUser = await Magasin.findOne({ email: email }).populate({
+      path: 'subscriptions',
+      select: '_id type',
+    });
   } catch (err) {
     console.log(err);
     return new Error(err);

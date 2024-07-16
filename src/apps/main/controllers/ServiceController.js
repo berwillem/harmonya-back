@@ -70,12 +70,13 @@ exports.getServiceById = async (req, res) => {
 
 // Update a service by ID
 exports.updateServiceById = async (req, res) => {
-  const { id } = req.params;
-  const { Name, prix, time, details } = req.body;
+  const { serviceId } = req.params;
+  const { Name, prix, time, details,category } = req.body;
+  console.log(Name,prix,time,details);
   try {
     const updatedService = await Service.findByIdAndUpdate(
-      id,
-      { Name, prix, time, details },
+      serviceId,
+      { Name, prix, time, details,category },
       { new: true }
     );
     if (!updatedService) {
