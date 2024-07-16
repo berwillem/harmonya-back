@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bookingRequestSchema = new mongoose.Schema({
   employee: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "Employee",
     required: false,
   },
 
@@ -31,8 +32,8 @@ const bookingRequestSchema = new mongoose.Schema({
 
   confirmed: {
     type: Boolean,
-    default:false,
-  }
+    default: false,
+  },
 });
 
 const BookingRequest = mongoose.model("BookingRequest", bookingRequestSchema);

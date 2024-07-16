@@ -4,8 +4,7 @@ const Magasin = require("../models/Magasin");
 // Create a new service
 exports.createService = async (req, res) => {
   try {
-  
-    const { Name, prix, time, details, category } = req.body;
+    const { Name, prix, time, details, category, cible } = req.body;
     const { magasinId } = req.params;
     const imageURLs = req.imageURLs;
     const newService = new Service({
@@ -13,6 +12,7 @@ exports.createService = async (req, res) => {
       prix,
       time,
       details,
+      cible,
       magasin: magasinId,
       category: category,
       images: imageURLs,
@@ -36,14 +36,84 @@ exports.createService = async (req, res) => {
 // Get all services
 exports.getAllServices = async (req, res) => {
   try {
-    const page = req.query.page || 1;
-    const pageSize = req.query.pageSize || 12;
-    const totalCount = await Service.countDocuments();
+    const {
+      page = 1,
+      pageSize = 12,
+      wilaya,
+      search,
+      minPrice,
+      maxPrice,
+    } = req.query
+
+    const matchStage = {};
+
+
+    if(search){
+      matchStage.Name = {$regex: search, $options: 'i'};
+    }
+
+    if(wilaya){
+      matchStage["magasinDetails.wilaya"] = { $in: [wilaya] };
+    }
+
+    if(minPrice){
+      matchStage.prix = {}
+      matchStage.prix.$gte = parseInt(minPrice)
+    }
+
+    if(maxPrice){
+      matchStage.prix = {}
+      matchStage.prix.$lte = parseInt(maxPrice)
+    }
+
+    const aggregationPipeline = [
+      {
+        $lookup: {
+          from: "magasins",
+          localField: "magasin",
+          foreignField: "_id",
+          as: "magasinDetails"
+        }
+      },
+      
+      {
+        $match: matchStage
+      },
+      
+      {
+        $sort: { score: -1 }  // Adjust this sort if needed
+      },
+      {
+        $skip: (page - 1) * pageSize
+      },
+      {
+        $limit: pageSize
+      },
+      {
+        $project: {magasinDetails:0}
+      }
+    ];
+
+    const totalCountPipeline = [
+      ...aggregationPipeline.slice(0, -2),
+      { $count: "totalCount" }
+    ];
+ 
+    const [services, totalCountResult] = await Promise.all([
+      Service.aggregate(aggregationPipeline),
+      Service.aggregate(totalCountPipeline)
+    ])
+
+    const totalCount = totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
     const totalPages = Math.ceil(totalCount / pageSize);
-    const services = await Service.find({})
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ score: -1 });
+    
+    // const pageSize = req.query.pageSize || 12;
+    // const totalCount = await Service.countDocuments();
+    // const totalPages = Math.ceil(totalCount / pageSize);
+    // const services = await Service.find({})
+      // .skip((page - 1) * pageSize)
+      // .limit(pageSize)
+      // .sort({ score: -1 });
     res.status(200).json({ services, totalPages });
   } catch (error) {
     res
@@ -71,7 +141,7 @@ exports.getServiceById = async (req, res) => {
 // Update a service by ID
 exports.updateServiceById = async (req, res) => {
   const { serviceId } = req.params;
-  const { Name, prix, time, details,category } = req.body;
+  const { Name, prix, time, details,category,cible } = req.body;
   console.log(Name,prix,time,details);
   try {
     const updatedService = await Service.findByIdAndUpdate(
