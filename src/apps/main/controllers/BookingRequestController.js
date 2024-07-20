@@ -3,6 +3,7 @@ const Store = require("../models/Store");
 const Service = require("../models/Service");
 const BookingRequest = require("../models/BookingRequest");
 const Employee = require("../models/Employee");
+const Magasin = require("../models/Magasin");
 const {
   agendaTimeAvailable,
   dateToAgenda,
@@ -11,7 +12,6 @@ const {
   agendaTimeAvailableLocal,
   dateToAgendaLocal,
 } = require("./AgendaController");
-const Magasin = require("../models/Magasin");
 
 exports.CreateBookingRequest = async (req, res) => {
   const { employee, date, client, store, service } = req.body;
@@ -77,17 +77,32 @@ exports.CreateBookingRequest = async (req, res) => {
   }
 };
 
-exports.getBookingRequestsByStore = async (req, res) => {
-  const { storeId } = req.params;
+exports.getBookingRequestsByMagasin = async (req, res) => {
+  const  magasinId  = req.params.id;
+
   try {
+    // Récupérer les stores associés au magasin
+    const magasin = await Magasin.findById(magasinId);
+    
+
+    if (!magasin) {
+      return res.status(400).json({ error: 'Magasin not found  ' });
+    }
+
+    // Utiliser directement le tableau de stores
+    const storeIds = magasin.stores;
+
+    // Récupérer les booking requests pour les stores
     const bookingRequests = await BookingRequest.find({
-      store: storeId,
-    }).populate("client employee store service");
+      store: { $in: storeIds }
+    }).populate('client store employee service');
+
     res.json(bookingRequests);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch booking requests" });
+    res.status(500).json({ error: 'Failed to fetch booking requests' });
   }
 };
+
 exports.getBookingRequestsByUser = async (req, res) => {
   const { userId } = req.params;
   try {
