@@ -17,6 +17,7 @@ const {
   imageUploadLimit,
   dynamicImageUpload,
 } = require("../../../middlewares/imageUpload");
+const { getBookingRequestsByMagasin } = require("../controllers/BookingRequestController");
 const router = express.Router();
 
 router.get("/", getAllMagasins);
@@ -35,6 +36,7 @@ router.get("/stores/:id", getMagasinStores);
 router.delete("/:magasinid", deleteMagasin);
 router.put("/tour/:magasinid", updateMagasinTour);
 router.get("/count", countMagasins);
+router.get("/:id/reservations",getBookingRequestsByMagasin);
 
 router.get("/:id", getMagasinById);
 
