@@ -4,12 +4,7 @@ const { filterObject, arrayify } = require("../../../helpers/utilities");
 
 exports.getAllMagasins = async (req, res) => {
   try {
-    const {
-      page = 1,
-      pageSize = 12,
-      wilaya,
-      search,
-    } = req.query;
+    const { page = 1, pageSize = 12, wilaya, search } = req.query;
 
     const matchStage = {};
     if (wilaya) {
@@ -18,7 +13,7 @@ exports.getAllMagasins = async (req, res) => {
     }
 
     if (search) {
-      matchStage.magasinName = { $regex: search, $options: 'i' };
+      matchStage.magasinName = { $regex: search, $options: "i" };
     }
 
     const aggregationPipeline = [
@@ -30,22 +25,23 @@ exports.getAllMagasins = async (req, res) => {
         $project: {
           name: "$magasinName",
           images: { $ifNull: ["$infos.images", null] },
-          id: "$_id"
-        }
-      }
+          id: "$_id",
+        },
+      },
     ];
 
     const totalCountPipeline = [
       { $match: matchStage },
-      { $count: "totalCount" }
+      { $count: "totalCount" },
     ];
 
     const [magasins, totalCountResult] = await Promise.all([
       Magasin.aggregate(aggregationPipeline).exec(),
-      Magasin.aggregate(totalCountPipeline).exec()
+      Magasin.aggregate(totalCountPipeline).exec(),
     ]);
 
-    const totalCount = totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
+    const totalCount =
+      totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
     const totalPages = Math.ceil(totalCount / pageSize);
 
     res.status(200).json({ magasins, totalPages });
@@ -59,7 +55,7 @@ exports.getAllMagasins = async (req, res) => {
 
 exports.getMagasinById = async (req, res) => {
   try {
-    const magasin = Magasin.findById(req.params.id).select(
+    const magasin = await Magasin.findById(req.params.id).select(
       "-password -tour -completedAuth"
     );
     return res.status(200).json(magasin);
@@ -151,8 +147,9 @@ exports.getMagasinInfos = async (req, res) => {
               user.lastVisit = today;
             }
             await magasin.save();
-            return res.status(201).json({...magasin.infos, magasinName: magasin.magasinName});
-
+            return res
+              .status(201)
+              .json({ ...magasin.infos, magasinName: magasin.magasinName });
           }
         }
         const foundYear = magasin.data.visits.auth.find(
@@ -172,7 +169,9 @@ exports.getMagasinInfos = async (req, res) => {
     } else {
       return res.status(404).json({ message: "Magasin Not Found" });
     }
-    return res.status(201).json({...magasin.infos, magasinName: magasin.magasinName});
+    return res
+      .status(201)
+      .json({ ...magasin.infos, magasinName: magasin.magasinName });
   } catch (error) {
     // console.log(error)
     return res.status(400).json({ message: "mouchkil" });
