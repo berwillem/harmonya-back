@@ -170,3 +170,15 @@ exports.countBoosts = async (req, res) => {
     res.status(400).send(err);
   }
 };
+exports.getBoostsByIdMagasian = async (req, res) => {
+  const { magasinid } = req.params;
+  try {
+
+    const boosts = await Boost.find({magasin:magasinid})
+     
+
+    return res.status(200).json({ boosts });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};

@@ -140,3 +140,15 @@ exports.getallBoosts = async (req, res) => {
     res.status(400).send(err);
   }
 };
+exports.getBoostsReqByIdMagasian = async (req, res) => {
+  const { magasinid } = req.params;
+  try {
+
+    const boosts = await BoostRequest.find({magasin:magasinid})
+     
+
+    return res.status(200).json({ boosts });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};

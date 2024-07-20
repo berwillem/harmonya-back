@@ -228,8 +228,33 @@ exports.getSubscriptionInfos = async (req, res) => {
     if (!subscription) {
       return res.status(404).json({ message: "Subscription not found" });
     }
+
+    const now = new Date();
+    const end = new Date(subscription.dates.end);
+    let diff = end - now;
+
+    const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+    diff -= months * 1000 * 60 * 60 * 24 * 30;
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    diff -= days * 1000 * 60 * 60 * 24;
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    diff -= hours * 1000 * 60 * 60;
+
+    const minutes = Math.floor(diff / (1000 * 60));
+    diff -= minutes * 1000 * 60;
+
+    const seconds = Math.floor(diff / 1000);
+
     const data = {
-      timeleft: subscription.dates.end - Date.now(),
+      timeleft: {
+        months,
+        days,
+        hours,
+        minutes,
+        seconds
+      },
       type: subscription.type,
       paid: subscription.paid,
       active: subscription.active,
