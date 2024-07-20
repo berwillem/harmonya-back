@@ -10,9 +10,5 @@ router.delete("/:id", BookingRequestController.deleteBookingRequest);
 router.post("/decline", BookingRequestController.declineBookingRequest);
 router.get("/user/:userId", BookingRequestController.getBookingRequestsByUser);
 router.put("/:id", BookingRequestController.updateBookingRequest);
-router.get(
-  "/store/:storeId",
-  BookingRequestController.getBookingRequestsByStore
-);
 
 module.exports = router;
