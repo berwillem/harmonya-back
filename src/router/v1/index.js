@@ -29,4 +29,6 @@ router.use(
   require(ADMIN_ROUTES_PATH + "PubManagmentMobil")
 );
 
+router.use("/notify", require(MAIN_ROUTES_PATH + "Notification"))
+
 module.exports = router;
