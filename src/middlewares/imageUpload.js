@@ -88,6 +88,7 @@ exports.dynamicImageUpload = async (req, res, next) => {
       console.log(err);
       return res.status(400).json({ message: "Multer error: " + err.message });
     } else if (err) {
+      console.log(err)
       return res.status(500).json({ message: "Error: " + err.message });
     }
     try {
@@ -111,6 +112,7 @@ exports.dynamicImageUpload = async (req, res, next) => {
       // Proceed to the next middleware or route handler
       next();
   } catch (error) {
+      console.log(error)
       res.status(500).send('Error uploading to Cloudinary.');
   }
   });

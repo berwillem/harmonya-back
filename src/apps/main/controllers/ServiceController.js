@@ -1,5 +1,6 @@
 const Service = require("../models/Service");
 const Magasin = require("../models/Magasin");
+const { arrayify } = require("../../../helpers/utilities");
 
 // Create a new service
 exports.createService = async (req, res) => {
@@ -141,12 +142,16 @@ exports.getServiceById = async (req, res) => {
 // Update a service by ID
 exports.updateServiceById = async (req, res) => {
   const { serviceId } = req.params;
+  // console.log("called")
   const { Name, prix, time, details,category,cible } = req.body;
+
+  const images = [...arrayify(req.body.images), ...arrayify(req.images)];
+  console.log(images);
   console.log(Name,prix,time,details);
   try {
     const updatedService = await Service.findByIdAndUpdate(
       serviceId,
-      { Name, prix, time, details,category },
+      { Name, prix, time, details,category, images },
       { new: true }
     );
     if (!updatedService) {

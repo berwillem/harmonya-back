@@ -14,8 +14,8 @@ io.on('connection', (socket)=> {
     // console.log(userSockets)
   })
 
-  socket.on("registerMagasin", ({ userId })=> {
-    userSockets[userId] = socket.id
+  socket.on("registerMagasin", ({ magasinId })=> {
+    userSockets[magasinId] = socket.id
     socket.join("magasins")
     console.log(userSockets)
   })

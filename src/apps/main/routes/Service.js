@@ -4,6 +4,7 @@ const ServiceController = require("../controllers/ServiceController");
 const {
   multipleImageUpload,
   imageUploadLimit,
+  dynamicImageUpload,
 } = require("../../../middlewares/imageUpload");
 
 // user auth routes :
@@ -14,7 +15,7 @@ router.post(
   multipleImageUpload,
   ServiceController.createService
 );
-router.put("/:serviceId", ServiceController.updateServiceById);
+router.put("/:serviceId",dynamicImageUpload, ServiceController.updateServiceById);
 router.get("/category/:id", ServiceController.getServicesByCategory);
 router.get("/id/:id", ServiceController.getServiceById);
 router.delete("/id/:id", ServiceController.deleteServiceById);

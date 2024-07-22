@@ -1,30 +1,34 @@
+const { arrayify } = require("../../../helpers/utilities");
 const PubManagment = require("../models/PubManagment");
 
 exports.createOrUpdatePubManagment = async (req, res) => {
   try {
-    const { titre_principale, titre_secondaire, link } = req.body;
-    const image = req.imageURL;
+    const titre_principale = arrayify(req.body.titresPrincipales)
+    const titre_secondaire = arrayify(req.body.titresSecondaires)
+    const link = arrayify(req.body.links)
 
+    const image = req.imageURL;
+    const images = [...arrayify(req.body.images), ...arrayify(req.images)];
+
+    console.log(images)
     let pubManagment = await PubManagment.findOne();
 
     if (!pubManagment) {
       pubManagment = new PubManagment({
-        slides: [
-          {
-            images: image,
-            titre_principale: titre_principale,
-            titre_secondaire: titre_secondaire,
-            link: link,
-          },
-        ],
+        slides: images.map((image, index)=> ({
+          images: image,
+          titre_principale: titre_principale[index],
+          titre_secondaire: titre_secondaire[index],
+          link: link[index],
+        }))
       });
     } else {
-      pubManagment.slides.push({
+      pubManagment.slides =images.map((image, index)=> ({
         images: image,
-        titre_principale: titre_principale,
-        titre_secondaire: titre_secondaire,
-        link: link,
-      });
+        titre_principale: titre_principale[index],
+        titre_secondaire: titre_secondaire[index],
+        link: link[index],
+      }))
     }
 
     const savedPubManagment = await pubManagment.save();

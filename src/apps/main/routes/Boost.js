@@ -18,19 +18,21 @@ const {
 } = require("../controllers/BoostController");
 
 const router = express.Router();
-router.get("/boostreq", getAllBoostRequests);
-router.get("/", getAllBoosts);
 router.post("/", createBoostRequest);
 router.post("/validate", validateBoostRequest);
 router.post("/invalidate", invalidateBoostRequest);
 router.post("/prepare", prepareBoostRequest)
 router.post("/unprepare", unprepareBoostRequest)
-router.delete("/boostreq/:requestId", cancelBoostRequest);
 router.post("/activate", createBoostFromRequest);
-router.delete("/:boostId", cancelBoost);
+
+router.get("/boostreq", getAllBoostRequests);
+router.get("/", getAllBoosts);
 router.get("/count", countBoosts);
+router.get("/boostreq/:magasinid", getBoostsReqByIdMagasian);
 router.get("/:magasinid", getBoostsByIdMagasian);
-router.get("/boostsreq/:magasinid", getBoostsReqByIdMagasian);
+
+router.delete("/boostreq/:requestId", cancelBoostRequest);
+router.delete("/:boostId", cancelBoost);
 
 
 module.exports = router;
