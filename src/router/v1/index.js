@@ -29,4 +29,6 @@ router.use(
 router.use("/e-paiement",require(EPAIMENTE_ROUTES_PATH + "Receips"));
 router.use("/statReceip",require(EPAIMENTE_ROUTES_PATH + "StatReceip"));
 
+router.use("/notify", require(MAIN_ROUTES_PATH + "Notification"))
+
 module.exports = router;
