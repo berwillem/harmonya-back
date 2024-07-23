@@ -79,38 +79,75 @@ exports.CreateBookingRequest = async (req, res) => {
 };
 
 
-exports.getBookingRequestsByStore = async (req, res) => {
-  const { storeId } = req.params;
-  console.log("storeId: ", storeId);
+exports.getBookingRequestsByMagasin = async (req, res) => {
+  const  magasinId  = req.params.id;  
+  console.log("storeId: ", magasinId);
+
   try {
-    const bookingRequests = await BookingRequest.aggregate(
-      [
-        {
-          '$lookup': {
-            'from': 'stores', 
-            'localField': 'store', 
-            'foreignField': '_id', 
-            'as': 'storeDetails'
-          }
-        },
-        {
-          '$unwind': {
-            'path': '$storeDetails'
-          }
-        
-        },
-        {
-          '$match': {
-            'storeDetails.owner': new mongoose.Types.ObjectId(storeId)
-          }
-        }, 
-        {
-          '$project': {
-            "storeDetails":0
-          }
+    const bookingRequests = await BookingRequest.aggregate([
+      {
+        '$lookup': {
+          'from': 'stores', 
+          'localField': 'store', 
+          'foreignField': '_id', 
+          'as': 'store'
         }
-      ]
-    )
+      },
+      {
+        '$unwind': {
+          'path': '$store',
+          'preserveNullAndEmptyArrays': true
+        }
+      },
+      {
+        '$match': {
+          'store.owner': new mongoose.Types.ObjectId(magasinId)
+        }
+      },
+      {
+        '$lookup': {
+          'from': 'users', 
+          'localField': 'client', 
+          'foreignField': '_id', 
+          'as': 'client'
+        }
+      },
+      {
+        '$lookup': {
+          'from': 'employees', 
+          'localField': 'employee', 
+          'foreignField': '_id', 
+          'as': 'employee'
+        }
+      },
+      {
+        '$lookup': {
+          'from': 'services', 
+          'localField': 'service', 
+          'foreignField': '_id', 
+          'as': 'service'
+        }
+      },
+      {
+        '$unwind': {
+          'path': '$client',
+          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if clientDetails is missing
+        }
+      },
+      {
+        '$unwind': {
+          'path': '$employee',
+          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if employeeDetails is missing
+        }
+      },
+      {
+        '$unwind': {
+          'path': '$service',
+          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if serviceDetails is missing
+        }
+      },
+      
+    ]);
     res.json(bookingRequests);
   } catch (error) {
     console.log(error)
