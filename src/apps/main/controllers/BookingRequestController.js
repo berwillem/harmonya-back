@@ -3,7 +3,8 @@ const Store = require("../models/Store");
 const Service = require("../models/Service");
 const BookingRequest = require("../models/BookingRequest");
 const Employee = require("../models/Employee");
-const Magasin = require("../models/Magasin");
+const mongoose = require("mongoose");
+
 const {
   agendaTimeAvailable,
   dateToAgenda,
@@ -77,29 +78,44 @@ exports.CreateBookingRequest = async (req, res) => {
   }
 };
 
-exports.getBookingRequestsByMagasin = async (req, res) => {
-  const  magasinId  = req.params.id;
 
+exports.getBookingRequestsByStore = async (req, res) => {
+  const { storeId } = req.params;
+  console.log("storeId: ", storeId);
   try {
-    // Récupérer les stores associés au magasin
-    const magasin = await Magasin.findById(magasinId);
-    
-
-    if (!magasin) {
-      return res.status(400).json({ error: 'Magasin not found  ' });
-    }
-
-    // Utiliser directement le tableau de stores
-    const storeIds = magasin.stores;
-
-    // Récupérer les booking requests pour les stores
-    const bookingRequests = await BookingRequest.find({
-      store: { $in: storeIds }
-    }).populate('client store employee service');
-
+    const bookingRequests = await BookingRequest.aggregate(
+      [
+        {
+          '$lookup': {
+            'from': 'stores', 
+            'localField': 'store', 
+            'foreignField': '_id', 
+            'as': 'storeDetails'
+          }
+        },
+        {
+          '$unwind': {
+            'path': '$storeDetails'
+          }
+        
+        },
+        {
+          '$match': {
+            'storeDetails.owner': new mongoose.Types.ObjectId(storeId)
+          }
+        }, 
+        {
+          '$project': {
+            "storeDetails":0
+          }
+        }
+      ]
+    )
     res.json(bookingRequests);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch booking requests' });
+    console.log(error)
+    res.status(500).json({ error: "Failed to fetch booking requests" });
+
   }
 };
 
