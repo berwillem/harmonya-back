@@ -40,6 +40,7 @@ exports.getAllServices = async (req, res) => {
       page = 1,
       pageSize = 12,
       wilaya,
+      gender,
       search,
       minPrice,
       maxPrice,
@@ -54,6 +55,9 @@ exports.getAllServices = async (req, res) => {
 
     if(wilaya){
       matchStage["magasinDetails.wilaya"] = { $in: [wilaya] };
+    }
+    if (gender) {
+      matchStage.cible = gender;
     }
 
     if(minPrice){
