@@ -171,7 +171,7 @@ exports.closeHour = async (req, res) => {
           await dateToAgenda(employeeAgenda, new Date(date)),
           0
         );
-        console.log(emp._id)
+        // console.log(emp._id)
       });
       await agendaSet(
         storeObj.displayAgenda,
@@ -188,7 +188,7 @@ exports.closeHour = async (req, res) => {
         await dateToAgenda(employeeAgenda, new Date(date)),
         0
       );
-      console.log(employeeAgenda);
+      // console.log(employeeAgenda);
       return res.status(200).json(employeeAgenda);
     }
   } catch (err) {
