@@ -13,6 +13,8 @@ const {
   agendaTimeAvailableLocal,
   dateToAgendaLocal,
 } = require("./AgendaController");
+const { notifyMagasin, notifyUser } = require("../../../helpers/notificationUtils");
+const Magasin = require("../models/Magasin");
 
 exports.CreateBookingRequest = async (req, res) => {
   const { employee, date, client, store, service } = req.body;
@@ -71,6 +73,12 @@ exports.CreateBookingRequest = async (req, res) => {
 
     const newRequest = new BookingRequest(req.body);
     const savedRequest = await newRequest.save();
+    await notifyMagasin({
+      magasinId: storeObject.owner,
+      title: "New booking request",
+      message: `New booking request from ${user.userName} for ${serviceObject.Name}`,
+      type: "info"
+    })
     return res.status(201).json(savedRequest);
   } catch (err) {
     // console.error(err);
@@ -209,7 +217,13 @@ exports.acceptBookingRequest = async (req, res) => {
     await Magasin.findByIdAndUpdate(storeObj.owner, {
       $inc: { "data.bookings": 1 },
     });
-
+    console.log("notified")
+    await notifyUser({
+      userId: bookingRequest.client,
+      title: "Booking Request Accepted",
+      message: "Your booking request has been accepted.",
+      type: "info"
+    })
     return res.status(200).json({ message: "Booking Request accepted" });
   } catch (error) {
     console.error(error);
