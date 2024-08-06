@@ -72,7 +72,7 @@ exports.startSubscription = async (req, res) => {
     });
     await subscription.save();
     if (subreq) {
-      (await SubscriptionRequ) & est.findByIdAndDelete(subreq);
+      await SubscriptionRequest.findByIdAndDelete(subreq);
     }
     return res
       .status(201)
