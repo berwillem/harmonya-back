@@ -33,7 +33,7 @@ exports.notifyUser = async ({ userId, title, message, payload,type}) => {
   })
 };
 
-exports.notifyMagasin = async ({ magasinId, title, message, payload, type }) => {
+exports.notifyMagasin = async ({ magasinId, title, message, payload = {}, type }) => {
   await createNotification({
     title,
     message,

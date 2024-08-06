@@ -7,17 +7,19 @@ const {
   dynamicImageUpload,
 } = require("../../../middlewares/imageUpload");
 
-// user auth routes :
-router.get("/", ServiceController.getAllServices);
 router.post(
   "/:magasinId",
   imageUploadLimit,
   multipleImageUpload,
   ServiceController.createService
 );
-router.put("/:serviceId",dynamicImageUpload, ServiceController.updateServiceById);
+
+router.get("/", ServiceController.getAllServices);
 router.get("/category/:id", ServiceController.getServicesByCategory);
 router.get("/id/:id", ServiceController.getServiceById);
+
+router.put("/:serviceId",dynamicImageUpload, ServiceController.updateServiceById);
+
 router.delete("/id/:id", ServiceController.deleteServiceById);
 
 module.exports = router;

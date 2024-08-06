@@ -3,7 +3,8 @@ const Store = require("../models/Store");
 const Service = require("../models/Service");
 const BookingRequest = require("../models/BookingRequest");
 const Employee = require("../models/Employee");
-const Magasin = require("../models/Magasin");
+const mongoose = require("mongoose");
+
 const {
   agendaTimeAvailable,
   dateToAgenda,
@@ -12,6 +13,8 @@ const {
   agendaTimeAvailableLocal,
   dateToAgendaLocal,
 } = require("./AgendaController");
+const { notifyMagasin, notifyUser } = require("../../../helpers/notificationUtils");
+const Magasin = require("../models/Magasin");
 
 exports.CreateBookingRequest = async (req, res) => {
   const { employee, date, client, store, service } = req.body;
@@ -70,6 +73,12 @@ exports.CreateBookingRequest = async (req, res) => {
 
     const newRequest = new BookingRequest(req.body);
     const savedRequest = await newRequest.save();
+    await notifyMagasin({
+      magasinId: storeObject.owner,
+      title: "New booking request",
+      message: `New booking request from ${user.userName} for ${serviceObject.Name}`,
+      type: "info"
+    })
     return res.status(201).json(savedRequest);
   } catch (err) {
     // console.error(err);
@@ -77,29 +86,81 @@ exports.CreateBookingRequest = async (req, res) => {
   }
 };
 
+
 exports.getBookingRequestsByMagasin = async (req, res) => {
-  const  magasinId  = req.params.id;
+  const  magasinId  = req.params.id;  
+  console.log("storeId: ", magasinId);
 
   try {
-    // Récupérer les stores associés au magasin
-    const magasin = await Magasin.findById(magasinId);
-    
-
-    if (!magasin) {
-      return res.status(400).json({ error: 'Magasin not found  ' });
-    }
-
-    // Utiliser directement le tableau de stores
-    const storeIds = magasin.stores;
-
-    // Récupérer les booking requests pour les stores
-    const bookingRequests = await BookingRequest.find({
-      store: { $in: storeIds }
-    }).populate('client store employee service');
-
+    const bookingRequests = await BookingRequest.aggregate([
+      {
+        '$lookup': {
+          'from': 'stores', 
+          'localField': 'store', 
+          'foreignField': '_id', 
+          'as': 'store'
+        }
+      },
+      {
+        '$unwind': {
+          'path': '$store',
+          'preserveNullAndEmptyArrays': true
+        }
+      },
+      {
+        '$match': {
+          'store.owner': new mongoose.Types.ObjectId(magasinId)
+        }
+      },
+      {
+        '$lookup': {
+          'from': 'users', 
+          'localField': 'client', 
+          'foreignField': '_id', 
+          'as': 'client'
+        }
+      },
+      {
+        '$lookup': {
+          'from': 'employees', 
+          'localField': 'employee', 
+          'foreignField': '_id', 
+          'as': 'employee'
+        }
+      },
+      {
+        '$lookup': {
+          'from': 'services', 
+          'localField': 'service', 
+          'foreignField': '_id', 
+          'as': 'service'
+        }
+      },
+      {
+        '$unwind': {
+          'path': '$client',
+          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if clientDetails is missing
+        }
+      },
+      {
+        '$unwind': {
+          'path': '$employee',
+          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if employeeDetails is missing
+        }
+      },
+      {
+        '$unwind': {
+          'path': '$service',
+          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if serviceDetails is missing
+        }
+      },
+      
+    ]);
     res.json(bookingRequests);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch booking requests' });
+    console.log(error)
+    res.status(500).json({ error: "Failed to fetch booking requests" });
+
   }
 };
 
@@ -156,7 +217,13 @@ exports.acceptBookingRequest = async (req, res) => {
     await Magasin.findByIdAndUpdate(storeObj.owner, {
       $inc: { "data.bookings": 1 },
     });
-
+    console.log("notified")
+    await notifyUser({
+      userId: bookingRequest.client,
+      title: "Booking Request Accepted",
+      message: "Your booking request has been accepted.",
+      type: "info"
+    })
     return res.status(200).json({ message: "Booking Request accepted" });
   } catch (error) {
     console.error(error);

@@ -18,12 +18,14 @@ router.get("/", getAllEmployees);
 // Get a specific employee by ID
 router.get("/:id", getEmployeeById);
 
+// Get a specific employee's agenda by ID
+router.get("/agenda/:id", getEmployeeAgenda)
+
 // Update an employee by ID
 router.put("/:id", updateEmployee);
 
 // Delete an employee by ID
 router.delete("/:id", deleteEmployee);
 
-router.get("/agenda/:id", getEmployeeAgenda)
 
 module.exports = router;

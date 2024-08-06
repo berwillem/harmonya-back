@@ -6,9 +6,12 @@ const {
   getSubscriptionRequestsByMagasinId,
 } = require("../controllers/SubscriptionRequestController");
 const router = express.Router();
+
+router.post("/", createSubscriptionRequest);
+
 router.get("/", getAllSubscriptionRequests);
 router.get("/:magasinId", getSubscriptionRequestsByMagasinId);
-router.post("/", createSubscriptionRequest);
+
 router.delete("/:id", deleteSubscriptionRequest);
 
 module.exports = router;

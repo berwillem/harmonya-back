@@ -21,6 +21,14 @@ const { getBookingRequestsByMagasin } = require("../controllers/BookingRequestCo
 const router = express.Router();
 
 router.get("/", getAllMagasins);
+router.get("/services", getMagasinServices);
+router.get("/infos", getMagasinInfos);
+router.get("/stores/:id", getMagasinStores);
+router.get("/count", countMagasins);
+router.get("/:id/reservations",getBookingRequestsByMagasin);
+router.get("/:id", getMagasinById);
+
+router.put("/tour/:magasinid", updateMagasinTour);
 router.put(
   "/update/:magasinId",
   // imageUploadLimit,
@@ -28,16 +36,6 @@ router.put(
   setMagasinInfo
 );
 
-
-router.get("/services", getMagasinServices);
-router.get("/infos", getMagasinInfos);
-// router.put("/infos/:magasinId", update)
-router.get("/stores/:id", getMagasinStores);
 router.delete("/:magasinid", deleteMagasin);
-router.put("/tour/:magasinid", updateMagasinTour);
-router.get("/count", countMagasins);
-router.get("/:id/reservations",getBookingRequestsByMagasin);
-
-router.get("/:id", getMagasinById);
 
 module.exports = router;

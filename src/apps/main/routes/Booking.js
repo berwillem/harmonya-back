@@ -6,9 +6,12 @@ const BookingRequestController = require("../controllers/BookingRequestControlle
 
 router.post("/request", BookingRequestController.CreateBookingRequest);
 router.post("/accept", BookingRequestController.acceptBookingRequest);
-router.delete("/:id", BookingRequestController.deleteBookingRequest);
 router.post("/decline", BookingRequestController.declineBookingRequest);
-router.get("/user/:userId", BookingRequestController.getBookingRequestsByUser);
+
+router.delete("/:id", BookingRequestController.deleteBookingRequest);
+
 router.put("/:id", BookingRequestController.updateBookingRequest);
+
+router.get("/user/:userId", BookingRequestController.getBookingRequestsByUser);
 
 module.exports = router;

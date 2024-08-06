@@ -16,6 +16,7 @@ router.post("/users", allUsersNotification);
 router.post("/magasins", allMagasinsNotification);
 router.post("/user/:userId", userNotification);
 router.post("/magasin/:magasinId", magasinNotification);
+
 router.get("/user/:userId", getNotificationsByUser);
 router.get("/magasin/:magasinId", getNotificationsByMagasin);
 
