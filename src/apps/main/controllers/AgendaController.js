@@ -256,7 +256,7 @@ exports.agendaTimeAvailable = async (agendaId, agendaTime) => {
   }
 };
 
-exports.agendaTimeAvailableLocal = async (agenda, agendaTime) => {
+exports.agendaTimeAvailableLocal = (agenda, agendaTime) => {
   try {
     const { day, index } = agendaTime;
 
