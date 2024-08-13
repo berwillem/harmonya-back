@@ -95,7 +95,7 @@ exports.deleteEmployee = async (req, res) => {
 exports.getEmployeeAgenda = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id).populate('agenda')
-    console.log(employee)
+    // console.log(employee)
     return res.status(200).json(employee.agenda)
 
   }catch(error){
