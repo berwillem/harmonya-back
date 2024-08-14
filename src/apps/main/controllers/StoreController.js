@@ -9,6 +9,7 @@ const {
   updateAgenda,
   agendaSet,
   dateToAgenda,
+  refreshAgenda,
 } = require("./AgendaController");
 
 // CREATE - Create a new store
@@ -188,6 +189,7 @@ exports.closeHour = async (req, res) => {
         await dateToAgenda(employeeAgenda, new Date(date)),
         0
       );
+      await refreshAgenda(store);
       // console.log(employeeAgenda);
       return res.status(200).json(employeeAgenda);
     }
