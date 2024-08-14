@@ -145,7 +145,6 @@ exports.getBoostsReqByIdMagasian = async (req, res) => {
   try {
 
     const boosts = await BoostRequest.find({magasin:magasinid})
-     
 
     return res.status(200).json({ boosts });
   } catch (err) {

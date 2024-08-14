@@ -1,7 +1,23 @@
 const mongoose = require("mongoose");
 
 const PubManagmentMobilSchema = new mongoose.Schema({
-  images: [{ type: String }],
+  slides: [
+    {
+      images: { type: String },
+      titre_principale: {
+        type: String,
+        required: true,
+      },
+      titre_secondaire: {
+        type: String,
+        required: true,
+      },
+      link: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
 
 const PubManagmentMobil = mongoose.model(

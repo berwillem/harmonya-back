@@ -43,7 +43,7 @@ exports.CreateBookingRequest = async (req, res) => {
         ) {
           employeeObj = emp;
           req.body.employee = emp._id;
-          console.log("employeeObj: ", employeeObj);
+          // console.log("employeeObj: ", employeeObj);
           break;
         }
       }
@@ -63,7 +63,10 @@ exports.CreateBookingRequest = async (req, res) => {
     ) {
       return res.status(400).json({ message: "Employee unavailable" });
     }
-
+    console.log("agenda available: ", agendaTimeAvailableLocal(
+      employeeObj.agenda,
+      dateToAgendaLocal(employeeObj.agenda, new Date(date))
+    ))
     await agendaToggle(
       employeeObj.agenda._id,
       dateToAgendaLocal(employeeObj.agenda, new Date(date))
