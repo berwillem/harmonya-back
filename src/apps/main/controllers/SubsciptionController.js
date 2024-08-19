@@ -71,6 +71,8 @@ exports.startSubscription = async (req, res) => {
       paid,
     });
     await subscription.save();
+    magasin.subscriptions.push(subscription._id);
+    await magasin.save()
     if (subreq) {
       await SubscriptionRequest.findByIdAndDelete(subreq);
     }
