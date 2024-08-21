@@ -61,7 +61,7 @@ exports.multipleImageUpload = (req, res, next) => {
 
     const uploadPromises = req.files.map((file) => {
       return uploadToCloudinary(file)
-        .then((result) => uploadedImages.push(result.secure_url))
+        .then((result) => uploadedImages.push(result))
         .catch((error) => {
           console.error(error);
           throw new Error("Error uploading image to Cloudinary");
