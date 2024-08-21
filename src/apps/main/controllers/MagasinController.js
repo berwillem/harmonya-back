@@ -116,7 +116,7 @@ exports.getMagasinInfos = async (req, res) => {
     if (userId === magasinId) {
       return res
         .status(201)
-        .json({ ...magasin.infos, magasinName: magasin.magasinName });
+        .json({ ...magasin.infos, magasinName: magasin.magasinName,email: magasin.email });
     }
     if (magasin) {
       const today = new Date();
@@ -171,7 +171,7 @@ exports.getMagasinInfos = async (req, res) => {
     }
     return res
       .status(201)
-      .json({ ...magasin.infos, magasinName: magasin.magasinName });
+      .json({ ...magasin.infos, magasinName: magasin.magasinName,email: magasin.email  });
   } catch (error) {
     // console.log(error)
     return res.status(400).json({ message: "mouchkil" });
