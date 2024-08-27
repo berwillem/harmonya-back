@@ -142,11 +142,31 @@ exports.getSubscriptionsByMagasinId = async (req, res) => {
 };
 exports.getAllSubscriptions = async (req, res) => {
   try {
-    const page = req.query.page || 1;
-    const pageSize = req.query.pageSize || 10;
-    const totalCount = await Subscription.countDocuments();
+    const {
+      page = 1,
+      pageSize = 10,
+      obj
+    } = req.query;
+    const { magasin, type, active } = obj ? JSON.parse(obj) : {};
+;
+    // Construire les filtres dynamiquement
+    const filters = {};
+    if (magasin) {
+      filters.magasin = magasin;
+    }
+    if (type) {
+      filters.type = type;
+    }
+    if (active) {
+      filters.active = active=="a"?true:active=="i"?false:null;
+    }
+
+    // Compter le nombre total d'abonnements en fonction des filtres
+    const totalCount = await Subscription.countDocuments(filters);
     const totalPages = Math.ceil(totalCount / pageSize);
-    const subscriptions = await Subscription.find({})
+
+    // Récupérer les abonnements en fonction des filtres et des options de pagination
+    const subscriptions = await Subscription.find(filters)
       .skip((page - 1) * pageSize)
       .limit(pageSize)
       .sort({ score: -1 });
@@ -157,6 +177,7 @@ exports.getAllSubscriptions = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
 exports.countSubscriptions = async (req, res) => {
   try {
     const totalCount = await Subscription.countDocuments();
