@@ -57,7 +57,7 @@ exports.getMagasinById = async (req, res) => {
   try {
     const magasin = await Magasin.findById(req.params.id).select(
       "-password -tour -completedAuth"
-    );
+    ).populate("subscriptions");
     return res.status(200).json(magasin);
   } catch (err) {
     console.error(err);
