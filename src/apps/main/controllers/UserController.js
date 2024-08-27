@@ -53,3 +53,25 @@ exports.countUsers = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.setUserInfo = async (req, res) => {
+  const { email, userName, phoneNumber } = req.body;
+  console.log(email, userName, phoneNumber);
+  // const {pdp, images} = req;
+
+  const { userId } = req.params;
+  try {
+
+    await User.findByIdAndUpdate(
+      userId,
+      { email, userName, phoneNumber },
+      { new: true, runValidators: true }
+    );
+    return res.status(201).json({ message: "Update Successful" });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while updating the information." });
+  }
+};

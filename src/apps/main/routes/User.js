@@ -7,6 +7,8 @@ router.get("/count", UserController.countUsers);
 router.get("/", UserController.getAllUsers);
 router.get("/:id", UserController.getUser);
 
+router.put("/:userId", UserController.setUserInfo);
+
 router.delete("/:id", UserController.deleteUser);
 
 module.exports = router;
