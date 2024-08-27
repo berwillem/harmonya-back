@@ -172,9 +172,25 @@ exports.getBookingRequestsByUser = async (req, res) => {
   try {
     const bookingRequests = await BookingRequest.find({
       client: userId,
-    }).populate("client store service employee");
+    // }).populate("client store service employee");
+    }).populate([{
+      path: "store",
+      select: "storeName owner",
+      populate: {
+        path: "owner",
+        select: "infos.numero"
+      },
+    }, {
+      path: "service",
+      select: "Name time prix"
+    }, {
+      path: "employee",
+      select: "nom prenom"
+    }]);
+    
     res.json(bookingRequests);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: "Failed to fetch booking requests" });
   }
 };
