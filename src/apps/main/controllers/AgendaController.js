@@ -189,7 +189,7 @@ exports.dateToAgenda = async (agendaId, date) => {
     result.day = Math.floor(
       (date.getTime() - agenda.startDate.getTime()) / (1000 * 3600 * 24)
     );
-    if (result.day < 0 || result.day > 30) {
+    if (result.day < 0 || result.day > 60) {
       console.error("Date outside agenda");
       return false;
     }
@@ -221,7 +221,7 @@ exports.dateToAgendaLocal = (agenda, date) => {
     result.day = Math.floor(
       (date.getTime() - agenda.startDate.getTime()) / (1000 * 3600 * 24)
     );
-    if (result.day < 0 || result.day > 30) {
+    if (result.day < 0 || result.day > 60) {
       console.error("Date outside agenda");
       return false;
     }
