@@ -175,7 +175,7 @@ exports.getBookingRequestsByUser = async (req, res) => {
     // }).populate("client store service employee");
     }).populate([{
       path: "store",
-      select: "storeName owner",
+      select: "storeName owner location",
       populate: {
         path: "owner",
         select: "infos.numero"
