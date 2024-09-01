@@ -17,9 +17,20 @@ exports.createStore = async (req, res) => {
   try {
     const ownerId = req.body.owner;
     const { agenda, wilaya, location, storeName, owner } = req.body;
-    const baseAgenda = await createAgenda(agenda);
+    console.log(agenda)
+    const extended = {unit: agenda.unit, agenda: [
+      ...(agenda.agenda),
+      ...(agenda.agenda),
+      ...(agenda.agenda),
+      ...(agenda.agenda),
+      ...(agenda.agenda),
+      ...(agenda.agenda),
+      ...(agenda.agenda),
+      ...(agenda.agenda),
+    ]}
+    const baseAgenda = await createAgenda(extended);
     console.log(baseAgenda);
-    const displayAgenda = await createAgenda(agenda);
+    const displayAgenda = await createAgenda(extended);
 
     if (!ownerId) {
       return res.status(400).json({ error: "Owner ID is required" });
@@ -56,13 +67,14 @@ exports.createStore = async (req, res) => {
     }
     if (magasin) {
       const wilayaExists = magasin.wilaya.includes(savedStore.wilaya);
-      
+
       if (!wilayaExists) {
         magasin.wilaya.push(savedStore.wilaya);
         await magasin.save();
       } else {
-      
-        return res.status(200).json({ message: "Wilaya already exists in magasin" });
+        return res
+          .status(200)
+          .json({ message: "Wilaya already exists in magasin" });
       }
     } else {
       return res.status(404).json({ error: "Magasin not found" });
@@ -164,7 +176,6 @@ exports.closeHour = async (req, res) => {
     if (employee === "employee") {
       const storeObj = await Store.findById(store).populate("employees");
       storeObj.employees.map(async (emp, index) => {
-        
         const employeeAgenda = (await Employee.findById(emp).select("agenda"))
           .agenda;
         await agendaSet(
@@ -179,7 +190,7 @@ exports.closeHour = async (req, res) => {
         await dateToAgenda(storeObj.displayAgenda, new Date(date)),
         0
       );
-      return res.status(200).json({messaage: "machya"});
+      return res.status(200).json({ messaage: "machya" });
     } else {
       const employeeAgenda = (
         await Employee.findById(employee).select("agenda")
@@ -194,12 +205,10 @@ exports.closeHour = async (req, res) => {
       return res.status(200).json(employeeAgenda);
     }
   } catch (err) {
-    
     console.error(err);
-    return res.status(500)
+    return res.status(500);
   }
 };
-
 
 exports.getStoreEmployees = async (req, res) => {
   try {
