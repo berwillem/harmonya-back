@@ -57,6 +57,6 @@ connectDB()
       );
     });
   })
-  .catch((err) => console.log("failed to connect to database",err));
+  .catch((err) => console.log("failed to connect to database", err));
 
 module.exports = server;

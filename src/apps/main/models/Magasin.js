@@ -121,7 +121,6 @@ const magasinSchema = new mongoose.Schema({
     },
   },
   infos: {
-    Adresse: String,
     numero: String,
     Desc: String,
     pdp: String,

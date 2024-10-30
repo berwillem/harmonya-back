@@ -157,7 +157,7 @@ exports.getAllStoresStat = async (req, res) => {
           _id: 1,
           storeName: 1,
           location: 1,
-          "infos.Adresse": 1, // Accéder à l'adresse du magasin à travers les infos du magasin
+          // "infos.Adresse": 1, // Accéder à l'adresse du magasin à travers les infos du magasin
           owner: 1, // Inclure l'ID du propriétaire du magasin
           "infos.numero": 1, // Accéder au numéro de téléphone à travers les infos du magasin
           numberOfBookingRequests: {

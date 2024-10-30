@@ -55,9 +55,9 @@ exports.getAllMagasins = async (req, res) => {
 
 exports.getMagasinById = async (req, res) => {
   try {
-    const magasin = await Magasin.findById(req.params.id).select(
-      "-password -tour -completedAuth"
-    ).populate("subscriptions");
+    const magasin = await Magasin.findById(req.params.id)
+      .select("-password -tour -completedAuth")
+      .populate("subscriptions");
     return res.status(200).json(magasin);
   } catch (err) {
     console.error(err);
@@ -68,7 +68,7 @@ exports.getMagasinById = async (req, res) => {
 };
 
 exports.setMagasinInfo = async (req, res) => {
-  const { adresse, name, desc, numero } = req.body;
+  const { name, desc, numero } = req.body;
   const pdp = req.body.pdp ? req.body.pdp : req.pdp[0];
   const images = [...arrayify(req.body.images), ...arrayify(req.images)];
 
@@ -77,7 +77,7 @@ exports.setMagasinInfo = async (req, res) => {
   const { magasinId } = req.params;
   try {
     const infos = {
-      Adresse: adresse,
+      // Adresse: adresse,
       Desc: desc,
       numero,
       pdp: pdp || null,
@@ -114,9 +114,11 @@ exports.getMagasinInfos = async (req, res) => {
   try {
     const magasin = await Magasin.findOne({ _id: magasinId });
     if (userId === magasinId) {
-      return res
-        .status(201)
-        .json({ ...magasin.infos, magasinName: magasin.magasinName,email: magasin.email });
+      return res.status(201).json({
+        ...magasin.infos,
+        magasinName: magasin.magasinName,
+        email: magasin.email,
+      });
     }
     if (magasin) {
       const today = new Date();
@@ -169,9 +171,11 @@ exports.getMagasinInfos = async (req, res) => {
     } else {
       return res.status(404).json({ message: "Magasin Not Found" });
     }
-    return res
-      .status(201)
-      .json({ ...magasin.infos, magasinName: magasin.magasinName,email: magasin.email  });
+    return res.status(201).json({
+      ...magasin.infos,
+      magasinName: magasin.magasinName,
+      email: magasin.email,
+    });
   } catch (error) {
     // console.log(error)
     return res.status(400).json({ message: "mouchkil" });
@@ -246,14 +250,14 @@ exports.updateMagasinTour = async (req, res) => {
 
 exports.updateMagasinInfos = async (req, res) => {
   const { magasinid } = req.params;
-  const { adresse, name, desc, numero } = req.body;
+  const { name, desc, numero } = req.body;
   const { pdp, images } = req;
 
   try {
     const magasin = await Magasin.findByIdUpdate(
       magasinid,
       {
-        "infos.Adresse": adresse,
+        // "infos.Adresse": adresse,
         "infos.Desc": desc,
         "infos.numero": numero,
         "infos.pdp": pdp,
