@@ -9,15 +9,17 @@ const {
 } = require("../../../helpers/notificationUtils");
 const Notification = require("../models/Notification");
 
-exports.readNotification = async (req, res) => {
+exports.readNotifications = async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
-    if (!notification) {
-      return res.status(404).json({ message: "Notification not found" });
-    }
-    notification.read = true;
-    await notification.save();
-    return res.status(200).json(notification);
+    const userId = req.params.id;
+    const { userType } = req.params;
+
+    const notification = await Notification.updateMany(
+      { [userType === "magasin" ? "targetMagasin" : "targetUser"]: userId },
+      { read: true }
+    );
+
+    return res.status(200).json("notifications read");
   } catch (err) {
     return res.status(500).json({ message: "Failed to read notification" });
   }
