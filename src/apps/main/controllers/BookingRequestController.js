@@ -91,7 +91,7 @@ exports.CreateBookingRequest = async (req, res) => {
 
 
 exports.getBookingRequestsByMagasin = async (req, res) => {
-  const  magasinId  = req.params.id;  
+  const magasinId = req.params.id;  
   console.log("storeId: ", magasinId);
 
   try {
@@ -112,7 +112,8 @@ exports.getBookingRequestsByMagasin = async (req, res) => {
       },
       {
         '$match': {
-          'store.owner': new mongoose.Types.ObjectId(magasinId)
+          'store.owner': new mongoose.Types.ObjectId(magasinId),
+          'confirmed': false // Only include unconfirmed bookings
         }
       },
       {
@@ -142,19 +143,19 @@ exports.getBookingRequestsByMagasin = async (req, res) => {
       {
         '$unwind': {
           'path': '$client',
-          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if clientDetails is missing
+          'preserveNullAndEmptyArrays': true
         }
       },
       {
         '$unwind': {
           'path': '$employee',
-          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if employeeDetails is missing
+          'preserveNullAndEmptyArrays': true
         }
       },
       {
         '$unwind': {
           'path': '$service',
-          'preserveNullAndEmptyArrays': true // Optional: Keeps documents even if serviceDetails is missing
+          'preserveNullAndEmptyArrays': true
         }
       },
       
@@ -163,9 +164,9 @@ exports.getBookingRequestsByMagasin = async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(500).json({ error: "Failed to fetch booking requests" });
-
   }
 };
+
 
 exports.getBookingRequestsByUser = async (req, res) => {
   const { userId } = req.params;
