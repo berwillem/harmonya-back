@@ -55,9 +55,9 @@ exports.getAllMagasins = async (req, res) => {
 
 exports.getMagasinById = async (req, res) => {
   try {
-    const magasin = await Magasin.findById(req.params.id).select(
-      "-password -tour -completedAuth"
-    ).populate("subscriptions");
+    const magasin = await Magasin.findById(req.params.id)
+      .select("-password -tour -completedAuth")
+      .populate("subscriptions");
     return res.status(200).json(magasin);
   } catch (err) {
     console.error(err);
@@ -114,9 +114,11 @@ exports.getMagasinInfos = async (req, res) => {
   try {
     const magasin = await Magasin.findOne({ _id: magasinId });
     if (userId === magasinId) {
-      return res
-        .status(201)
-        .json({ ...magasin.infos, magasinName: magasin.magasinName,email: magasin.email });
+      return res.status(201).json({
+        ...magasin.infos,
+        magasinName: magasin.magasinName,
+        email: magasin.email,
+      });
     }
     if (magasin) {
       const today = new Date();
@@ -169,9 +171,11 @@ exports.getMagasinInfos = async (req, res) => {
     } else {
       return res.status(404).json({ message: "Magasin Not Found" });
     }
-    return res
-      .status(201)
-      .json({ ...magasin.infos, magasinName: magasin.magasinName,email: magasin.email  });
+    return res.status(201).json({
+      ...magasin.infos,
+      magasinName: magasin.magasinName,
+      email: magasin.email,
+    });
   } catch (error) {
     // console.log(error)
     return res.status(400).json({ message: "mouchkil" });
@@ -191,6 +195,21 @@ exports.getMagasinsByCategory = async (req, res) => {
         )
       );
   } catch (error) {
+    return res.status(400).json({ message: "mouchkil" });
+  }
+};
+exports.getMagasinsBySousCategory = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const magasins = await Magasin.find({ sousCategory: id });
+    const filteredMagasins = magasins.map((magasin) =>
+      filterObject(magasin.toObject(), ["magasinName", "services", "stores"])
+    );
+
+    return res.status(201).json(filteredMagasins);
+  } catch (error) {
+    console.error(error);
     return res.status(400).json({ message: "mouchkil" });
   }
 };
