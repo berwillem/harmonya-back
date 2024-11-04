@@ -26,6 +26,11 @@ const serviceSchema = new mongoose.Schema({
     ref: "Category",
     required: true,
   },
+  souscategory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SousCategory",
+    required: true,
+  },
   cible: {
     type: String,
     enum: ["men", "women", "both"],

@@ -5,9 +5,11 @@ const { arrayify } = require("../../../helpers/utilities");
 // Create a new service
 exports.createService = async (req, res) => {
   try {
-    const { Name, prix, time, details, category, cible } = req.body;
+    const { Name, prix, time, details, category, cible, souscategory } =
+      req.body;
     const { magasinId } = req.params;
     const imageURLs = req.imageURLs;
+
     const newService = new Service({
       Name,
       prix,
@@ -15,7 +17,8 @@ exports.createService = async (req, res) => {
       details,
       cible,
       magasin: magasinId,
-      category: category,
+      category,
+      souscategory,
       images: imageURLs,
     });
 
@@ -45,30 +48,29 @@ exports.getAllServices = async (req, res) => {
       search,
       minPrice,
       maxPrice,
-    } = req.query
+    } = req.query;
 
     const matchStage = {};
 
-
-    if(search){
-      matchStage.Name = {$regex: search, $options: 'i'};
+    if (search) {
+      matchStage.Name = { $regex: search, $options: "i" };
     }
 
-    if(wilaya){
+    if (wilaya) {
       matchStage["magasinDetails.wilaya"] = { $in: [wilaya] };
     }
     if (gender) {
       matchStage.cible = gender;
     }
 
-    if(minPrice){
-      matchStage.prix = {}
-      matchStage.prix.$gte = parseInt(minPrice)
+    if (minPrice) {
+      matchStage.prix = {};
+      matchStage.prix.$gte = parseInt(minPrice);
     }
 
-    if(maxPrice){
-      matchStage.prix = {}
-      matchStage.prix.$lte = parseInt(maxPrice)
+    if (maxPrice) {
+      matchStage.prix = {};
+      matchStage.prix.$lte = parseInt(maxPrice);
     }
 
     const aggregationPipeline = [
@@ -77,48 +79,49 @@ exports.getAllServices = async (req, res) => {
           from: "magasins",
           localField: "magasin",
           foreignField: "_id",
-          as: "magasinDetails"
-        }
+          as: "magasinDetails",
+        },
       },
-      
+
       {
-        $match: matchStage
+        $match: matchStage,
       },
-      
+
       {
-        $sort: { score: -1 }  // Adjust this sort if needed
-      },
-      {
-        $skip: (page - 1) * pageSize
+        $sort: { score: -1 }, // Adjust this sort if needed
       },
       {
-        $limit: pageSize
+        $skip: (page - 1) * pageSize,
       },
       {
-        $project: {magasinDetails:0}
-      }
+        $limit: pageSize,
+      },
+      {
+        $project: { magasinDetails: 0 },
+      },
     ];
 
     const totalCountPipeline = [
       ...aggregationPipeline.slice(0, -2),
-      { $count: "totalCount" }
+      { $count: "totalCount" },
     ];
- 
+
     const [services, totalCountResult] = await Promise.all([
       Service.aggregate(aggregationPipeline),
-      Service.aggregate(totalCountPipeline)
-    ])
+      Service.aggregate(totalCountPipeline),
+    ]);
 
-    const totalCount = totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
+    const totalCount =
+      totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
     const totalPages = Math.ceil(totalCount / pageSize);
-    
+
     // const pageSize = req.query.pageSize || 12;
     // const totalCount = await Service.countDocuments();
     // const totalPages = Math.ceil(totalCount / pageSize);
     // const services = await Service.find({})
-      // .skip((page - 1) * pageSize)
-      // .limit(pageSize)
-      // .sort({ score: -1 });
+    // .skip((page - 1) * pageSize)
+    // .limit(pageSize)
+    // .sort({ score: -1 });
     res.status(200).json({ services, totalPages });
   } catch (error) {
     res
@@ -143,19 +146,15 @@ exports.getServiceById = async (req, res) => {
   }
 };
 
-// Update a service by ID
 exports.updateServiceById = async (req, res) => {
   const { serviceId } = req.params;
-  // console.log("called")
-  const { Name, prix, time, details,category,cible } = req.body;
-
+  const { Name, prix, time, details, category, cible, souscategory } = req.body;
   const images = [...arrayify(req.body.images), ...arrayify(req.images)];
-  console.log(images);
-  console.log(Name,prix,time,details);
+
   try {
     const updatedService = await Service.findByIdAndUpdate(
       serviceId,
-      { Name, prix, time, details,category, images },
+      { Name, prix, time, details, category, cible, souscategory, images },
       { new: true }
     );
     if (!updatedService) {
@@ -168,7 +167,6 @@ exports.updateServiceById = async (req, res) => {
       .json({ error: "An error occurred while updating the service." });
   }
 };
-
 // Delete a service by ID
 exports.deleteServiceById = async (req, res) => {
   const { id } = req.params;
@@ -195,5 +193,28 @@ exports.getServicesByCategory = async (req, res) => {
     return res
       .status(500)
       .json({ message: "An error occurred while retrieving services" });
+  }
+};
+
+// Get services by subcategory ID
+exports.getServicesBySubCategory = async (req, res) => {
+  const { souscategoryId } = req.params;
+  try {
+    const services = await Service.find({ souscategory: souscategoryId })
+      .populate("souscategory")
+      .populate("magasin");
+
+    if (!services || services.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No services found for this subcategory." });
+    }
+
+    res.status(200).json({ services });
+  } catch (error) {
+    console.error("Error retrieving services by subcategory:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while retrieving services." });
   }
 };
