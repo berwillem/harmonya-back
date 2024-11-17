@@ -13,30 +13,39 @@ const {
 } = require("./AgendaController");
 
 // CREATE - Create a new store
+// CREATE - Create a new store
 exports.createStore = async (req, res) => {
   try {
     const ownerId = req.body.owner;
-    const { agenda, wilaya, location, storeName, owner } = req.body;
-    console.log(agenda)
-    const extended = {unit: agenda.unit, agenda: [
-      ...(agenda.agenda),
-      ...(agenda.agenda),
-      ...(agenda.agenda),
-      ...(agenda.agenda),
-      ...(agenda.agenda),
-      ...(agenda.agenda),
-      ...(agenda.agenda),
-      ...(agenda.agenda),
-    ]}
+    const { agenda, wilaya, location, storeName, owner, phone, email } =
+      req.body;
+
+    // Make sure phone and email are provided
+    if (!phone || !email) {
+      return res.status(400).json({ error: "Phone and email are required" });
+    }
+
+    const extended = {
+      unit: agenda.unit,
+      agenda: [
+        ...agenda.agenda,
+        ...agenda.agenda,
+        ...agenda.agenda,
+        ...agenda.agenda,
+        ...agenda.agenda,
+        ...agenda.agenda,
+        ...agenda.agenda,
+        ...agenda.agenda,
+      ],
+    };
     const baseAgenda = await createAgenda(extended);
-    console.log(baseAgenda);
     const displayAgenda = await createAgenda(extended);
 
     if (!ownerId) {
       return res.status(400).json({ error: "Owner ID is required" });
     }
 
-    // Create a new store with employee references
+    // Create a new store with phone and email
     const newStoreData = {
       wilaya,
       storeName,
@@ -45,7 +54,10 @@ exports.createStore = async (req, res) => {
       employees: [],
       baseAgenda: baseAgenda._id,
       displayAgenda: displayAgenda._id,
+      phone, // Add phone to the store data
+      email, // Add email to the store data
     };
+
     const newStore = new Store(newStoreData);
     const savedStore = await newStore.save();
 
@@ -57,6 +69,7 @@ exports.createStore = async (req, res) => {
         await createEmployeeLocal({ ...employeeData, store: savedStore._id });
       }
     }
+
     // Add the store ID to the owner's stores array
     const magasin = await Magasin.findById(ownerId);
     if (magasin) {
@@ -65,19 +78,16 @@ exports.createStore = async (req, res) => {
     } else {
       return res.status(404).json({ error: "Magasin not found" });
     }
-    if (magasin) {
-      const wilayaExists = magasin.wilaya.includes(savedStore.wilaya);
 
-      if (!wilayaExists) {
-        magasin.wilaya.push(savedStore.wilaya);
-        await magasin.save();
-      } else {
-        return res
-          .status(200)
-          .json({ message: "Wilaya already exists in magasin" });
-      }
+    // Ensure wilaya is updated
+    const wilayaExists = magasin.wilaya.includes(savedStore.wilaya);
+    if (!wilayaExists) {
+      magasin.wilaya.push(savedStore.wilaya);
+      await magasin.save();
     } else {
-      return res.status(404).json({ error: "Magasin not found" });
+      return res
+        .status(200)
+        .json({ message: "Wilaya already exists in magasin" });
     }
 
     res.status(201).json(savedStore);
@@ -110,20 +120,40 @@ exports.getStoreById = async (req, res) => {
 };
 
 // UPDATE - Update a specific store by ID
+
 exports.updateStoreById = async (req, res) => {
   try {
+    const { phone, email, employees } = req.body;
+
+    // Validate phone and email (if they are provided)
+    if (phone) {
+      const phoneRegex = /^[0-9\-+()]*$/; // You can modify the regex based on your phone number format
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ error: "Invalid phone number format" });
+      }
+    }
+
+    if (email) {
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+    }
+
+    // Find the store by ID and update the fields
     const updatedStore = await Store.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     ).populate("owner");
+
     if (!updatedStore) {
       return res.status(404).json({ error: "Store not found" });
     }
 
     // Update employees if provided
-    if (req.body.employees && req.body.employees.length > 0) {
-      for (const employeeData of req.body.employees) {
+    if (employees && employees.length > 0) {
+      for (const employeeData of employees) {
         await createEmployee({ body: employeeData }); // Assuming createEmployee accepts req
       }
     }

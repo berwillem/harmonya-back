@@ -5,7 +5,7 @@ const { arrayify } = require("../../../helpers/utilities");
 // Create a new service
 exports.createService = async (req, res) => {
   try {
-    const { Name, prix, time, details, category, cible, souscategory } =
+    const { Name, prix, time, details, category, cible, souscategory, color } =
       req.body;
     const { magasinId } = req.params;
     const imageURLs = req.imageURLs;
@@ -20,6 +20,7 @@ exports.createService = async (req, res) => {
       category,
       souscategory,
       images: imageURLs,
+      color, // Add the color field
     });
 
     const savedService = await newService.save();
@@ -148,13 +149,24 @@ exports.getServiceById = async (req, res) => {
 
 exports.updateServiceById = async (req, res) => {
   const { serviceId } = req.params;
-  const { Name, prix, time, details, category, cible, souscategory } = req.body;
+  const { Name, prix, time, details, category, cible, souscategory, color } =
+    req.body; // Include color
   const images = [...arrayify(req.body.images), ...arrayify(req.images)];
 
   try {
     const updatedService = await Service.findByIdAndUpdate(
       serviceId,
-      { Name, prix, time, details, category, cible, souscategory, images },
+      {
+        Name,
+        prix,
+        time,
+        details,
+        category,
+        cible,
+        souscategory,
+        images,
+        color,
+      }, // Include color
       { new: true }
     );
     if (!updatedService) {
@@ -167,6 +179,7 @@ exports.updateServiceById = async (req, res) => {
       .json({ error: "An error occurred while updating the service." });
   }
 };
+
 // Delete a service by ID
 exports.deleteServiceById = async (req, res) => {
   const { id } = req.params;
