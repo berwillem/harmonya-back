@@ -29,7 +29,7 @@ const serviceSchema = new mongoose.Schema({
   souscategory: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "SousCategory",
-    // required: true,
+    required: true,
   },
   cible: {
     type: String,
