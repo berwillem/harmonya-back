@@ -13,7 +13,10 @@ const {
   agendaTimeAvailableLocal,
   dateToAgendaLocal,
 } = require("./AgendaController");
-const { notifyMagasin, notifyUser } = require("../../../helpers/notificationUtils");
+const {
+  notifyMagasin,
+  notifyUser,
+} = require("../../../helpers/notificationUtils");
 const Magasin = require("../models/Magasin");
 
 exports.CreateBookingRequest = async (req, res) => {
@@ -63,10 +66,13 @@ exports.CreateBookingRequest = async (req, res) => {
     ) {
       return res.status(400).json({ message: "Employee unavailable" });
     }
-    console.log("agenda available: ", agendaTimeAvailableLocal(
-      employeeObj.agenda,
-      dateToAgendaLocal(employeeObj.agenda, new Date(date))
-    ))
+    console.log(
+      "agenda available: ",
+      agendaTimeAvailableLocal(
+        employeeObj.agenda,
+        dateToAgendaLocal(employeeObj.agenda, new Date(date))
+      )
+    );
     await agendaToggle(
       employeeObj.agenda._id,
       dateToAgendaLocal(employeeObj.agenda, new Date(date))
@@ -80,8 +86,8 @@ exports.CreateBookingRequest = async (req, res) => {
       magasinId: storeObject.owner,
       title: "New booking request",
       message: `New booking request from ${user.userName} for ${serviceObject.Name}`,
-      type: "info"
-    })
+      type: "info",
+    });
     return res.status(201).json(savedRequest);
   } catch (err) {
     // console.error(err);
@@ -89,112 +95,120 @@ exports.CreateBookingRequest = async (req, res) => {
   }
 };
 
-
 exports.getBookingRequestsByMagasin = async (req, res) => {
-  const magasinId = req.params.id;  
+  const magasinId = req.params.id;
   console.log("storeId: ", magasinId);
 
   try {
     const bookingRequests = await BookingRequest.aggregate([
       {
-        '$lookup': {
-          'from': 'stores', 
-          'localField': 'store', 
-          'foreignField': '_id', 
-          'as': 'store'
-        }
+        $lookup: {
+          from: "stores",
+          localField: "store",
+          foreignField: "_id",
+          as: "store",
+        },
       },
       {
-        '$unwind': {
-          'path': '$store',
-          'preserveNullAndEmptyArrays': true
-        }
+        $unwind: {
+          path: "$store",
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
-        '$match': {
-          'store.owner': new mongoose.Types.ObjectId(magasinId),
-          'confirmed': false // Only include unconfirmed bookings
-        }
+        $match: {
+          "store.owner": new mongoose.Types.ObjectId(magasinId),
+          confirmed: false, // Only include unconfirmed bookings
+        },
       },
       {
-        '$lookup': {
-          'from': 'users', 
-          'localField': 'client', 
-          'foreignField': '_id', 
-          'as': 'client'
-        }
+        $lookup: {
+          from: "users",
+          localField: "client",
+          foreignField: "_id",
+          as: "client",
+        },
       },
       {
-        '$lookup': {
-          'from': 'employees', 
-          'localField': 'employee', 
-          'foreignField': '_id', 
-          'as': 'employee'
-        }
+        $lookup: {
+          from: "employees",
+          localField: "employee",
+          foreignField: "_id",
+          as: "employee",
+        },
       },
       {
-        '$lookup': {
-          'from': 'services', 
-          'localField': 'service', 
-          'foreignField': '_id', 
-          'as': 'service'
-        }
+        $lookup: {
+          from: "services",
+          localField: "service",
+          foreignField: "_id",
+          as: "service",
+        },
       },
       {
-        '$unwind': {
-          'path': '$client',
-          'preserveNullAndEmptyArrays': true
-        }
+        $unwind: {
+          path: "$client",
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
-        '$unwind': {
-          'path': '$employee',
-          'preserveNullAndEmptyArrays': true
-        }
+        $unwind: {
+          path: "$employee",
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
-        '$unwind': {
-          'path': '$service',
-          'preserveNullAndEmptyArrays': true
-        }
+        $unwind: {
+          path: "$service",
+          preserveNullAndEmptyArrays: true,
+        },
       },
-      
     ]);
     res.json(bookingRequests);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ error: "Failed to fetch booking requests" });
   }
 };
-
 
 exports.getBookingRequestsByUser = async (req, res) => {
   const { userId } = req.params;
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 5;
+
   try {
-    const bookingRequests = await BookingRequest.find({
-      client: userId,
-    // }).populate("client store service employee");
-    }).populate([{
-      path: "store",
-      select: "storeName owner location",
-      populate: {
-        path: "owner",
-        select: "infos.numero"
-      },
-    }, {
-      path: "service",
-      select: "Name time prix"
-    }, {
-      path: "employee",
-      select: "nom prenom"
-    }]);
-    
-    res.json(bookingRequests);
+    const totalCount = await BookingRequest.countDocuments({ client: userId });
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const bookingRequests = await BookingRequest.find({ client: userId })
+      .populate([
+        {
+          path: "store",
+          select: "storeName owner location",
+          populate: {
+            path: "owner",
+            select: "infos.numero",
+          },
+        },
+        {
+          path: "service",
+          select: "Name time prix",
+        },
+        {
+          path: "employee",
+          select: "nom prenom",
+        },
+      ])
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    res.json({ bookingRequests, totalPages, totalCount });
   } catch (error) {
-    console.log(error)
+    console.error("Error fetching booking requests:", error);
     res.status(500).json({ error: "Failed to fetch booking requests" });
   }
 };
+
 exports.updateBookingRequest = async (req, res) => {
   try {
     const bookingRequest = await BookingRequest.findByIdAndUpdate(
@@ -237,13 +251,13 @@ exports.acceptBookingRequest = async (req, res) => {
     await Magasin.findByIdAndUpdate(storeObj.owner, {
       $inc: { "data.bookings": 1 },
     });
-    console.log("notified")
+    console.log("notified");
     await notifyUser({
       userId: bookingRequest.client,
       title: "Booking Request Accepted",
       message: "Your booking request has been accepted.",
-      type: "info"
-    })
+      type: "info",
+    });
     return res.status(200).json({ message: "Booking Request accepted" });
   } catch (error) {
     console.error(error);

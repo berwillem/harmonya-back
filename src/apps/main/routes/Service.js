@@ -16,9 +16,17 @@ router.post(
 
 router.get("/", ServiceController.getAllServices);
 router.get("/category/:id", ServiceController.getServicesByCategory);
+router.get(
+  "/subcategory/:souscategoryId",
+  ServiceController.getServicesBySubCategory
+);
 router.get("/id/:id", ServiceController.getServiceById);
 
-router.put("/:serviceId",dynamicImageUpload, ServiceController.updateServiceById);
+router.put(
+  "/:serviceId",
+  dynamicImageUpload,
+  ServiceController.updateServiceById
+);
 
 router.delete("/id/:id", ServiceController.deleteServiceById);
 

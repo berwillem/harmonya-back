@@ -198,6 +198,21 @@ exports.getMagasinsByCategory = async (req, res) => {
     return res.status(400).json({ message: "mouchkil" });
   }
 };
+exports.getMagasinsBySousCategory = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const magasins = await Magasin.find({ sousCategory: id });
+    const filteredMagasins = magasins.map((magasin) =>
+      filterObject(magasin.toObject(), ["magasinName", "services", "stores"])
+    );
+
+    return res.status(201).json(filteredMagasins);
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ message: "mouchkil" });
+  }
+};
 
 exports.getMagasinStores = async (req, res) => {
   const { id } = req.params;

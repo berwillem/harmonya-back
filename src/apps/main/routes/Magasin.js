@@ -11,13 +11,16 @@ const {
   updateMagasinTour,
   countMagasins,
   getMagasinById,
+  getMagasinsBySousCategory,
 } = require("../controllers/MagasinController");
 const {
   multipleImageUpload,
   imageUploadLimit,
   dynamicImageUpload,
 } = require("../../../middlewares/imageUpload");
-const { getBookingRequestsByMagasin } = require("../controllers/BookingRequestController");
+const {
+  getBookingRequestsByMagasin,
+} = require("../controllers/BookingRequestController");
 const router = express.Router();
 
 router.get("/", getAllMagasins);
@@ -25,7 +28,7 @@ router.get("/services", getMagasinServices);
 router.get("/infos", getMagasinInfos);
 router.get("/stores/:id", getMagasinStores);
 router.get("/count", countMagasins);
-router.get("/:id/reservations",getBookingRequestsByMagasin);
+router.get("/:id/reservations", getBookingRequestsByMagasin);
 router.get("/:id", getMagasinById);
 
 router.put("/tour/:magasinid", updateMagasinTour);
@@ -35,6 +38,8 @@ router.put(
   dynamicImageUpload,
   setMagasinInfo
 );
+
+router.get("/subcategories/:id/magasins", getMagasinsBySousCategory);
 
 router.delete("/:magasinid", deleteMagasin);
 
