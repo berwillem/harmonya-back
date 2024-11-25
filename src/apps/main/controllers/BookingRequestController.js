@@ -228,6 +228,7 @@ exports.getBookingRequestsByStore = async (req, res) => {
     console.log(storeId);
     const bookingRequests = await BookingRequest.find({
       store: storeId,
+      confirmed: true,
     }).populate("service", "Name time");
     console.log("bookingRequests: ", bookingRequests);
     return res.status(200).json(bookingRequests);
