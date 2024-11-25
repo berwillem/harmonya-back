@@ -3,6 +3,7 @@ const Store = require("../models/Store");
 const Service = require("../models/Service");
 const BookingRequest = require("../models/BookingRequest");
 const Employee = require("../models/Employee");
+const Magasin = require("../models/Magasin");
 const mongoose = require("mongoose");
 
 const {
@@ -17,13 +18,62 @@ const {
   notifyMagasin,
   notifyUser,
 } = require("../../../helpers/notificationUtils");
-const Magasin = require("../models/Magasin");
 
 exports.CreateBookingRequest = async (req, res) => {
   const { employee, date, client, store, service } = req.body;
   try {
     const user = await User.findById(client);
     if (!user) {
+      const magasin = await Magasin.findById(client);
+      if (magasin) {
+        const storeObject = await Store.findById(store);
+        if (!storeObject) {
+          return res.status(404).json({ message: "Store not found" });
+        }
+        const serviceObject = await Service.findById(service);
+        if (!serviceObject) {
+          return res.status(404).json({ message: "Service not found" });
+        }
+        let employeeObj;
+        if (employee === "employee") {
+          const employees = await Employee.find({ store }).populate("agenda");
+          for (emp of employees) {
+            if (
+              agendaTimeAvailableLocal(
+                emp.agenda,
+                dateToAgendaLocal(emp.agenda, new Date(date))
+              )
+            ) {
+              employeeObj = emp;
+              req.body.employee = emp._id;
+              console.log("employeeObj: ", employeeObj);
+              break;
+            }
+          }
+        } else {
+          console.log("called");
+          employeeObj = await Employee.findById(employee).populate("agenda");
+          if (!employeeObj) {
+            return res.status(404).json({ message: "Employee not found" });
+          }
+        }
+        if (
+          !agendaTimeAvailableLocal(
+            employeeObj.agenda,
+            dateToAgendaLocal(employeeObj.agenda, new Date(date))
+          )
+        ) {
+          return res.status(400).json({ message: "Employee unavailable" });
+        }
+        await agendaToggle(
+          employeeObj.agenda._id,
+          dateToAgendaLocal(employeeObj.agenda, new Date(date))
+        );
+
+        await refreshAgenda(store);
+
+        return res.status(201);
+      }
       return res.status(404).json({ message: "User not found" });
     }
     const storeObject = await Store.findById(store);
@@ -75,7 +125,8 @@ exports.CreateBookingRequest = async (req, res) => {
     );
     await agendaToggle(
       employeeObj.agenda._id,
-      dateToAgendaLocal(employeeObj.agenda, new Date(date))
+      dateToAgendaLocal(employeeObj.agenda, new Date(date)),
+      serviceObject.time
     );
 
     await refreshAgenda(store);
@@ -165,6 +216,22 @@ exports.getBookingRequestsByMagasin = async (req, res) => {
       },
     ]);
     res.json(bookingRequests);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to fetch booking requests" });
+  }
+};
+
+exports.getBookingRequestsByStore = async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    console.log(storeId);
+    const bookingRequests = await BookingRequest.find({
+      store: storeId,
+      confirmed: true,
+    }).populate("service", "Name time");
+    console.log("bookingRequests: ", bookingRequests);
+    return res.status(200).json(bookingRequests);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to fetch booking requests" });

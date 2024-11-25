@@ -42,7 +42,7 @@ exports.createTrialSubscription = async (req, res) => {
 
     return res
       .status(201)
-      .json({ message: "Trial subscription created successfully." });
+      .json({ message: "Subscription request created successfully.", magasin });
   } catch (error) {
     console.error("Error creating trial subscription:", error);
     return res.status(500).json({ message: "Internal server error." });
@@ -72,7 +72,7 @@ exports.startSubscription = async (req, res) => {
     });
     await subscription.save();
     magasin.subscriptions.push(subscription._id);
-    await magasin.save()
+    await magasin.save();
     if (subreq) {
       await SubscriptionRequest.findByIdAndDelete(subreq);
     }
@@ -142,13 +142,8 @@ exports.getSubscriptionsByMagasinId = async (req, res) => {
 };
 exports.getAllSubscriptions = async (req, res) => {
   try {
-    const {
-      page = 1,
-      pageSize = 10,
-      obj
-    } = req.query;
+    const { page = 1, pageSize = 10, obj } = req.query;
     const { magasin, type, active } = obj ? JSON.parse(obj) : {};
-;
     // Construire les filtres dynamiquement
     const filters = {};
     if (magasin) {
@@ -158,7 +153,7 @@ exports.getAllSubscriptions = async (req, res) => {
       filters.type = type;
     }
     if (active) {
-      filters.active = active=="a"?true:active=="i"?false:null;
+      filters.active = active == "a" ? true : active == "i" ? false : null;
     }
 
     // Compter le nombre total d'abonnements en fonction des filtres
@@ -258,7 +253,7 @@ exports.getSubscriptionInfos = async (req, res) => {
 
     const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
     diff -= months * 1000 * 60 * 60 * 24 * 30;
-    
+
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     diff -= days * 1000 * 60 * 60 * 24;
 
@@ -276,7 +271,7 @@ exports.getSubscriptionInfos = async (req, res) => {
         days,
         hours,
         minutes,
-        seconds
+        seconds,
       },
       type: subscription.type,
       paid: subscription.paid,

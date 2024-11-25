@@ -82,13 +82,31 @@ exports.getAllAgendas = async (req, res) => {
   }
 };
 
-exports.getAgendaById = async (req, res) => {
+exports.filterAgenda = (raw_agenda, duration) => {
+  if (!duration) return raw_agenda;
+  const agenda = { ...raw_agenda, agenda: [...raw_agenda.agenda] };
+  const { unit } = agenda;
+  const slots = Math.ceil(duration / unit);
+  agenda.agenda.forEach((day) => {
+    day[1].forEach((hour, index) => {
+      if (hour === 0) {
+        for (let i = 0; i < slots && index - i >= 0; i++) {
+          day[1][index - i] = 0;
+        }
+      }
+    });
+  });
+  return agenda;
+};
+
+exports.getAgendaById = async (req, res, duration) => {
   try {
     const agenda = await Agenda.findById(req.params.id);
+
     if (!agenda) {
       return res.status(404).json({ message: "Agenda not found" });
     }
-    return res.status(200).json(agenda);
+    return res.status(200).json(this.filterAgenda(agenda, duration));
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Internal server error" });
@@ -241,24 +259,27 @@ exports.dateToAgendaLocal = (agenda, date) => {
   }
 };
 
-exports.agendaTimeAvailable = async (agendaId, agendaTime) => {
+exports.agendaTimeAvailable = async (agendaId, agendaTime, duration = 30) => {
   try {
     const agenda = await Agenda.findById(agendaId);
-    const { day, index } = agendaTime;
-
-    if (agenda.agenda[day][1][index]) {
-      return true;
-    } else {
-      return false;
-    }
+    return this.agendaTimeAvailableLocal(agenda, agendaTime, duration);
   } catch (error) {
     console.error(error);
   }
 };
 
-exports.agendaTimeAvailableLocal = (agenda, agendaTime) => {
+exports.agendaTimeAvailableLocal = (agenda, agendaTime, duration = 30) => {
   try {
     const { day, index } = agendaTime;
+    const { unit } = agenda;
+    const slots = Math.ceil(duration / unit);
+    console.log(slots);
+    for (let i = index; i < index + slots; i++) {
+      if (!agenda.agenda[day][1][i]) {
+        return false;
+      }
+    }
+    return true;
 
     if (agenda.agenda[day][1][index]) {
       return true;
@@ -270,14 +291,22 @@ exports.agendaTimeAvailableLocal = (agenda, agendaTime) => {
   }
 };
 
-exports.agendaToggle = async (agendaId, agendaTime) => {
+exports.agendaToggle = async (agendaId, agendaTime, duration) => {
   // console.log("toggle function triggered");
   try {
     const agenda = await Agenda.findById(agendaId);
+    let slots;
+    if (!duration) slots = 1;
+    else slots = Math.ceil(duration / agenda.unit);
     const { day, index } = agendaTime;
+
+    for (let i = 0; i < slots; i++) {
+      agenda.agenda[day][1][index + i] =
+        agenda.agenda[day][1][index + i] == 1 ? 0 : 1;
+    }
     // console.log("agendaTime:", agendaTime);
     // console.log("agenda:", agenda.agenda[day]);
-    agenda.agenda[day][1][index] = agenda.agenda[day][1][index] == 1 ? 0 : 1;
+    // agenda.agenda[day][1][index] = agenda.agenda[day][1][index] == 1 ? 0 : 1;
     agenda.markModified("agenda");
     // console.log("agenda:", agenda.agenda[day]);
     await agenda.save();

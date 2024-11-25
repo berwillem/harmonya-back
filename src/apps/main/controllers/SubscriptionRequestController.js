@@ -1,5 +1,6 @@
 const SubscriptionRequest = require("../models/SubscriptionRequest");
 const Magasin = require("../models/Magasin");
+const Subscription = require("../models/Subscription");
 
 exports.getAllSubscriptionRequests = async (req, res) => {
   try {
@@ -39,9 +40,31 @@ exports.createSubscriptionRequest = async (req, res) => {
       duration,
     });
     await subscriptionRequest.save();
+
+    const currentDate = new Date();
+    const expirationDate = new Date(
+      currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
+
+    const trialSubscription = new Subscription({
+      magasin: magasinId,
+      type: "trial",
+      active: true,
+      trial: true,
+      dates: {
+        start: currentDate,
+        end: expirationDate,
+      },
+    });
+
+    await trialSubscription.save();
+    magasin.trial = true;
+    magasin.subscriptions.push(trialSubscription._id);
+    await magasin.save();
+
     return res
       .status(201)
-      .json({ message: "Subscription request created successfully." });
+      .json({ message: "Subscription request created successfully.", magasin });
   } catch (error) {
     console.error("Error creating subscription request:", error);
     return res.status(500).json({ message: "Internal server error." });

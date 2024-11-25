@@ -10,6 +10,7 @@ const {
   agendaSet,
   dateToAgenda,
   refreshAgenda,
+  filterAgenda,
 } = require("./AgendaController");
 
 // CREATE - Create a new store
@@ -17,6 +18,7 @@ const {
 exports.createStore = async (req, res) => {
   try {
     const ownerId = req.body.owner;
+
     const { agenda, wilaya, location, storeName, owner, phone, email } =
       req.body;
 
@@ -24,6 +26,7 @@ exports.createStore = async (req, res) => {
     if (!phone || !email) {
       return res.status(400).json({ error: "Phone and email are required" });
     }
+
 
     const extended = {
       unit: agenda.unit,
@@ -193,7 +196,9 @@ exports.getStoreAgenda = async (req, res) => {
     if (!storeObj) {
       return res.status(400).json({ messaage: "Store Not Found" });
     }
-    return res.status(200).json({ agenda: storeObj.displayAgenda });
+    return res
+      .status(200)
+      .json({ agenda: filterAgenda(storeObj.displayAgenda) });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
