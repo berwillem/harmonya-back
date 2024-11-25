@@ -222,6 +222,21 @@ exports.getBookingRequestsByMagasin = async (req, res) => {
   }
 };
 
+exports.getBookingRequestsByStore = async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    console.log(storeId);
+    const bookingRequests = await BookingRequest.find({
+      store: storeId,
+    }).populate("service", "Name time");
+    console.log("bookingRequests: ", bookingRequests);
+    return res.status(200).json(bookingRequests);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to fetch booking requests" });
+  }
+};
+
 exports.getBookingRequestsByUser = async (req, res) => {
   const { userId } = req.params;
   const page = parseInt(req.query.page) || 1;
