@@ -30,6 +30,14 @@ const storeSchema = new mongoose.Schema({
     ref: "Agenda",
     required: false,
   },
+  phone: {
+    type: Number,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
 });
 
 const Store = mongoose.model("Store", storeSchema);

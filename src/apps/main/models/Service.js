@@ -47,6 +47,10 @@ const serviceSchema = new mongoose.Schema({
       type: String,
     },
   ],
+  color: {
+    type: String,
+    required: true,
+  },
 });
 
 const Service = mongoose.model("Service", serviceSchema);
