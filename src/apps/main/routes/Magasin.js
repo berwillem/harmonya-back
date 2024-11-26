@@ -12,6 +12,8 @@ const {
   countMagasins,
   getMagasinById,
   getMagasinsBySousCategory,
+  getStep,
+  updateMagasinStep,
 } = require("../controllers/MagasinController");
 const {
   multipleImageUpload,
@@ -30,7 +32,7 @@ router.get("/stores/:id", getMagasinStores);
 router.get("/count", countMagasins);
 router.get("/:id/reservations", getBookingRequestsByMagasin);
 router.get("/:id", getMagasinById);
-
+router.put("/step/:magasinid", updateMagasinStep);
 router.put("/tour/:magasinid", updateMagasinTour);
 router.put(
   "/update/:magasinId",
@@ -42,5 +44,6 @@ router.put(
 router.get("/subcategories/:id/magasins", getMagasinsBySousCategory);
 
 router.delete("/:magasinid", deleteMagasin);
+
 
 module.exports = router;

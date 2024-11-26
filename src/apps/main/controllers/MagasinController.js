@@ -6,9 +6,9 @@ exports.getAllMagasins = async (req, res) => {
   try {
     const { page = 1, pageSize = 12, wilaya, search } = req.query;
 
-    const matchStage = {};
+    const matchStage = { completedauth: true }; // Add condition for completedauth being true
+
     if (wilaya) {
-      // matchStage["stores.wilaya"] = wilaya;
       matchStage["wilaya"] = { $in: [wilaya] };
     }
 
@@ -53,6 +53,7 @@ exports.getAllMagasins = async (req, res) => {
   }
 };
 
+
 exports.getMagasinById = async (req, res) => {
   try {
     const magasin = await Magasin.findById(req.params.id)
@@ -70,7 +71,6 @@ exports.getMagasinById = async (req, res) => {
 exports.setMagasinInfo = async (req, res) => {
   const { name, desc, numero } = req.body;
   const pdp = req.body.pdp ? req.body.pdp : req.pdp[0];
-  const images = [...arrayify(req.body.images), ...arrayify(req.images)];
 
   // const {pdp, images} = req;
 
@@ -81,12 +81,11 @@ exports.setMagasinInfo = async (req, res) => {
       Desc: desc,
       numero,
       pdp: pdp || null,
-      images: images,
     };
 
     await Magasin.findByIdAndUpdate(
       magasinId,
-      { infos, magasinName: name, completedauth: true },
+      { infos, magasinName: name },
       { new: true, runValidators: true }
     );
     return res.status(201).json({ message: "Update Successful" });
@@ -97,7 +96,56 @@ exports.setMagasinInfo = async (req, res) => {
       .json({ error: "An error occurred while updating the information." });
   }
 };
+exports.updateMagasinStep = async (req, res) => {
+  const { magasinid } = req.params;
+  const { step } = req.body; 
 
+  try {
+    
+    const magasin = await Magasin.findById(magasinid);
+    if (!magasin) {
+      return res.status(404).json({ error: "Magasin not found" });
+    }
+
+ 
+    if (step in magasin.registrationSteps) {
+      
+      magasin.registrationSteps[step] = true;
+
+      
+      magasin.updateCompletedAuth();
+      await magasin.save();
+
+      return res.status(200).json({ 
+        message: "Step updated successfully", 
+        completedauth: magasin.completedauth 
+      });
+    } else {
+      return res.status(400).json({ error: "Invalid step provided" });
+    }
+  } catch (err) {
+    console.error("Error in updateMagasinStep:", err);
+    return res.status(500).json({ error: "An error occurred while updating the step." });
+  }
+};
+exports.getStep = async (req, res) => {
+  const { magasinId } = req.query;
+
+  try {
+    const magasin = await Magasin.findOne({ _id: magasinId });
+    if (!magasin) {
+      return res.status(404).json({ message: "Magasin not found" });
+    }
+
+    return res.status(200).json({
+      step: magasin.step,
+      completedauth: magasin.completedauth,
+    });
+  } catch (error) {
+    console.error("Error in getStep:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 exports.getMagasinServices = async (req, res) => {
   const { magasinId } = req.query;
 

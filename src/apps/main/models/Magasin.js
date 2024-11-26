@@ -29,6 +29,11 @@ const magasinSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  registrationSteps: {
+    profileCompleted: { type: Boolean, default: false },
+    storeCreated: { type: Boolean, default: false },
+    serviceCreated: { type: Boolean, default: false },
+  },
 
   services: [
     {
@@ -145,6 +150,12 @@ const magasinSchema = new mongoose.Schema({
     },
   },
 });
+magasinSchema.methods.updateCompletedAuth = function () {
+  const stepsCompleted = Object.values(this.registrationSteps).every(
+    (step) => step === true
+  );
+  this.completedauth = stepsCompleted;
+};
 
 magasinSchema.pre("save", function (next) {
   // If there are no entries in the auth array, create one for the current year

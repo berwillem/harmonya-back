@@ -10,7 +10,7 @@ const {
 router.post(
   "/:magasinId",
   imageUploadLimit,
-  multipleImageUpload,
+  dynamicImageUpload,
   ServiceController.createService
 );
 

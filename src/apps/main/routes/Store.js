@@ -4,11 +4,13 @@ const StoreController = require("../controllers/StoreController"); // Replace wi
 const {
   getBookingRequestsByStore,
 } = require("../controllers/BookingRequestController");
+const { imageUploadLimit, multipleImageUpload, dynamicImageUpload } = require("../../../middlewares/imageUpload");
 
 // Store routes:
 
 // CREATE - Create a new store
-router.post("/", StoreController.createStore);
+router.post("/:magasinId",imageUploadLimit,
+  dynamicImageUpload, StoreController.createStore);
 router.post("/closehour", StoreController.closeHour);
 
 router.get("/", StoreController.getAllStores);
