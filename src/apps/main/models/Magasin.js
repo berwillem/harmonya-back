@@ -149,6 +149,12 @@ const magasinSchema = new mongoose.Schema({
       enum: ["mega", "standard", null],
     },
   },
+  blacklistedUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 magasinSchema.methods.updateCompletedAuth = function () {
   const stepsCompleted = Object.values(this.registrationSteps).every(

@@ -346,3 +346,41 @@ exports.countMagasins = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.addUserToBlacklist = async (req, res) => {
+  const { magasinId, userId } = req.params;
+
+  try {
+    const magasin = await Magasin.findById(magasinId);
+    if (!magasin)
+      return res.status(404).json({ message: "Magasin not found." });
+
+    if (!magasin.blacklistedUsers.includes(userId)) {
+      magasin.blacklistedUsers.push(userId);
+      await magasin.save();
+    }
+    return res.status(200).json({ message: "User added to blacklist." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.removeUserFromBlacklist = async (req, res) => {
+  const { magasinId, userId } = req.params;
+
+  try {
+    const magasin = await Magasin.findByIdAndUpdate(
+      magasinId,
+      { $pull: { blacklistedUsers: userId } },
+      { new: true }
+    );
+    if (!magasin)
+      return res.status(404).json({ message: "Magasin not found." });
+
+    return res.status(200).json({ message: "User removed from blacklist." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
