@@ -59,7 +59,8 @@ exports.multipleImageUpload = (req, res, next) => {
 
     const uploadedImages = [];
 
-    const uploadPromises = req.files.map((file) => {
+
+    const uploadPromises = req.map((file) => {
       return uploadToCloudinary(file)
         .then((result) => uploadedImages.push(result))
         .catch((error) => {
