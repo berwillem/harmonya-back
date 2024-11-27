@@ -7,13 +7,18 @@ const {
   updateEmployee,
   deleteEmployee,
   getEmployeeAgenda,
+  getEmployeeByStore,
 } = require("../controllers/EmployeeController");
+
 
 // Create a new employee
 router.post("/", createEmployee);
 
 // Get all employees
 router.get("/", getAllEmployees);
+// Get store employees
+router.get("/store/:idStore", getEmployeeByStore);
+
 
 // Get a specific employee by ID
 router.get("/:id", getEmployeeById);

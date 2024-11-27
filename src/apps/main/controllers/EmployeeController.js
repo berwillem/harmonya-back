@@ -26,6 +26,18 @@ exports.getAllEmployees = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+exports.getEmployeeByStore = async (req, res) => {
+  try {
+    const { idStore } = req.params; 
+    const employees = await Employee.find({ store: idStore }); 
+    
+   
+      res.status(200).json(employees); 
+    
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred while fetching employees", error: error.message }); 
+  }
+};
 
 exports.createEmployeeLocal = async ({ nom, prenom, fonction, store }) => {
   try {
