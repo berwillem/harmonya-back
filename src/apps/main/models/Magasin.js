@@ -144,6 +144,12 @@ const magasinSchema = new mongoose.Schema({
       enum: ["mega", "standard", null],
     },
   },
+  blacklistedUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 magasinSchema.pre("save", function (next) {

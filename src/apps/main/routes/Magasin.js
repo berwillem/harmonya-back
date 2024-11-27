@@ -1,6 +1,6 @@
 const express = require("express");
 
-// /magasin
+// magasin
 const {
   getAllMagasins,
   setMagasinInfo,
@@ -12,6 +12,8 @@ const {
   countMagasins,
   getMagasinById,
   getMagasinsBySousCategory,
+  addUserToBlacklist,
+  removeUserFromBlacklist,
 } = require("../controllers/MagasinController");
 const {
   multipleImageUpload,
@@ -40,7 +42,8 @@ router.put(
 );
 
 router.get("/subcategories/:id/magasins", getMagasinsBySousCategory);
-
 router.delete("/:magasinid", deleteMagasin);
+router.put("/:magasinId/addtoblacklist/:userId", addUserToBlacklist);
+router.put("/:magasinId/removefromblacklist/:userId", removeUserFromBlacklist);
 
 module.exports = router;
