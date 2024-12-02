@@ -8,8 +8,7 @@ exports.createService = async (req, res) => {
     const { Name, prix, time, details, category, cible, souscategory, color } =
       req.body;
     const { magasinId } = req.params;
-    const imageURLs = req.imageURLs;
-
+    const images = [...arrayify(req.body.images), ...arrayify(req.images)];
     const newService = new Service({
       Name,
       prix,
@@ -19,7 +18,7 @@ exports.createService = async (req, res) => {
       magasin: magasinId,
       category,
       souscategory,
-      images: imageURLs,
+      images: images,
       color, // Add the color field
     });
 

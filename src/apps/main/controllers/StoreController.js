@@ -12,21 +12,42 @@ const {
   refreshAgenda,
   filterAgenda,
 } = require("./AgendaController");
+const {  arrayify } = require("../../../helpers/utilities");
 
 // CREATE - Create a new store
 // CREATE - Create a new store
 exports.createStore = async (req, res) => {
   try {
-    const ownerId = req.body.owner;
+   
 
-    const { agenda, wilaya, location, storeName, owner, phone, email } =
-      req.body;
+    const {  wilaya, location, storeName, owner, phone, email } = req.body;
+    const images = [...arrayify(req.body.images), ...arrayify(req.images)];
 
-    // Make sure phone and email are provided
+    // Validate required fields
     if (!phone || !email) {
       return res.status(400).json({ error: "Phone and email are required" });
     }
 
+    if (!owner) {
+      return res.status(400).json({ error: "Owner ID is required" });
+    }
+
+    let agenda = req.body.agenda;
+    let employees = req.body.employees;
+    employees = JSON.parse(employees);
+    // Parse agenda if it's a string
+    if (typeof agenda === "string") {
+      try {
+        agenda = JSON.parse(agenda);
+      } catch (parseError) {
+        return res.status(400).json({ error: "Invalid agenda format" });
+      }
+    }
+
+    // Validate agenda structure
+    if (!agenda || !agenda.unit || !Array.isArray(agenda.agenda)) {
+      return res.status(400).json({ error: "Agenda must have a valid unit and agenda array" });
+    }
 
     const extended = {
       unit: agenda.unit,
@@ -41,14 +62,11 @@ exports.createStore = async (req, res) => {
         ...agenda.agenda,
       ],
     };
+  
     const baseAgenda = await createAgenda(extended);
     const displayAgenda = await createAgenda(extended);
 
-    if (!ownerId) {
-      return res.status(400).json({ error: "Owner ID is required" });
-    }
-
-    // Create a new store with phone and email
+    // Prepare new store data
     const newStoreData = {
       wilaya,
       storeName,
@@ -57,47 +75,46 @@ exports.createStore = async (req, res) => {
       employees: [],
       baseAgenda: baseAgenda._id,
       displayAgenda: displayAgenda._id,
-      phone, // Add phone to the store data
-      email, // Add email to the store data
+      phone,
+      email,
+      images,
     };
 
+    // Create and save the new store
     const newStore = new Store(newStoreData);
     const savedStore = await newStore.save();
+console.log(employees , employees.length);
 
-    if (req.body.employees && req.body.employees.length > 0) {
-      for (const employeeData of req.body.employees) {
-        let employeeId;
-
-        // Create a new employee
+    // Add employees if provided
+    if (employees && employees.length > 0) {
+      for (const employeeData of employees) {
+        console.log(employeeData);
+        
         await createEmployeeLocal({ ...employeeData, store: savedStore._id });
       }
     }
 
-    // Add the store ID to the owner's stores array
-    const magasin = await Magasin.findById(ownerId);
-    if (magasin) {
-      magasin.stores.push(savedStore._id);
-      await magasin.save();
-    } else {
+    // Add the store to the owner's magasins and update wilaya
+    const magasin = await Magasin.findById(owner);
+    if (!magasin) {
       return res.status(404).json({ error: "Magasin not found" });
     }
 
-    // Ensure wilaya is updated
-    const wilayaExists = magasin.wilaya.includes(savedStore.wilaya);
-    if (!wilayaExists) {
+    magasin.stores.push(savedStore._id);
+
+    if (!magasin.wilaya.includes(savedStore.wilaya)) {
       magasin.wilaya.push(savedStore.wilaya);
-      await magasin.save();
-    } else {
-      return res
-        .status(200)
-        .json({ message: "Wilaya already exists in magasin" });
     }
+
+    await magasin.save();
 
     res.status(201).json(savedStore);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
+
+
 
 // READ - Get all stores
 exports.getAllStores = async (req, res) => {

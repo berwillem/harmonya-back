@@ -1,6 +1,6 @@
 const express = require("express");
 
-// /magasin
+// magasin
 const {
   getAllMagasins,
   setMagasinInfo,
@@ -12,6 +12,10 @@ const {
   countMagasins,
   getMagasinById,
   getMagasinsBySousCategory,
+  getStep,
+  updateMagasinStep,
+  addUserToBlacklist,
+  removeUserFromBlacklist,
 } = require("../controllers/MagasinController");
 const {
   multipleImageUpload,
@@ -30,7 +34,7 @@ router.get("/stores/:id", getMagasinStores);
 router.get("/count", countMagasins);
 router.get("/:id/reservations", getBookingRequestsByMagasin);
 router.get("/:id", getMagasinById);
-
+router.put("/step/:magasinid", updateMagasinStep);
 router.put("/tour/:magasinid", updateMagasinTour);
 router.put(
   "/update/:magasinId",
@@ -40,7 +44,9 @@ router.put(
 );
 
 router.get("/subcategories/:id/magasins", getMagasinsBySousCategory);
-
 router.delete("/:magasinid", deleteMagasin);
+router.put("/:magasinId/addtoblacklist/:userId", addUserToBlacklist);
+router.put("/:magasinId/removefromblacklist/:userId", removeUserFromBlacklist);
+
 
 module.exports = router;

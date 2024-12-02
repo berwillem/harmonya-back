@@ -53,14 +53,22 @@ exports.getNotificationsByUser = async (req, res) => {
 
 exports.getNotificationsByMagasin = async (req, res) => {
   const { magasinId } = req.params;
+  const { type } = req.query;
+  let filter = {
+    $or: [
+      { targetType: "global" },
+      { targetType: "group", targetGroup: "magasins" },
+      { targetType: "magasin", targetMagasin: magasinId },
+    ],
+  };
+  if (type) {
+    filter = {
+      ...filter,
+      type,
+    };
+  }
   try {
-    const notifications = await Notification.find({
-      $or: [
-        { targetType: "global" },
-        { targetType: "group", targetGroup: "magasins" },
-        { targetType: "magasin", targetMagasin: magasinId },
-      ],
-    }).sort({ createdAt: -1 });
+    const notifications = await Notification.find(filter).sort({ createdAt: -1 });
 
     return res.status(200).json(notifications);
   } catch (err) {
@@ -69,7 +77,7 @@ exports.getNotificationsByMagasin = async (req, res) => {
 };
 
 exports.globalNotification = async (req, res) => {
-  const { title, message, payload = {}, type = "info" } = req.body;
+  const { title, message, payload = {} ,type} = req.body;
   try {
     await notifyGlobal({ title, message, payload, type });
     return res.status(200).json({ message: "Notification sent" });

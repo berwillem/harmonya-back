@@ -229,7 +229,7 @@ exports.getBookingRequestsByStore = async (req, res) => {
     const bookingRequests = await BookingRequest.find({
       store: storeId,
       confirmed: true,
-    }).populate("service", "Name time");
+    }).populate("service", "Name time color");
     console.log("bookingRequests: ", bookingRequests);
     return res.status(200).json(bookingRequests);
   } catch (error) {
